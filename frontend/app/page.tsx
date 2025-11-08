@@ -93,7 +93,7 @@ export default function Dashboard() {
       <main className="flex-1 overflow-auto max-w-full mx-auto px-6 py-8 min-h-0">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Interactions */}
-          <div className="lg:col-span-1 space-y-8 flex flex-col h-full">
+          <div className="lg:col-span-1 space-y-2 flex flex-col h-full">
             {/* Result display */}
             <ResultDisplay result={result} />
 

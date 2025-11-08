@@ -10,7 +10,7 @@ interface ResultDisplayProps {
 export default function ResultDisplay({ result }: ResultDisplayProps) {
   if (!result) {
     return (
-      <div className="w-full max-w-4xl mx-auto p-8 bg-gray-50 rounded-lg text-center text-gray-500">
+      <div className="w-full max-w-4xl mx-auto p-32 bg-gray-200 rounded-lg text-center text-sm text-gray-500">
         Submit a query to see results
       </div>
     );
