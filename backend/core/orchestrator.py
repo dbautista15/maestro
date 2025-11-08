@@ -84,9 +84,6 @@ class MaestroOrchestrator:
                 # Cache hit - return immediately
                 cached["total_latency_ms"] = (time.time() - start_time) * 1000
 
-                # Calculate context relevance from cached documents
-                context_relevance = self._calculate_context_relevance(cached["documents"])
-
                 # Log metrics
                 self.metrics.log_query(
                     query=query,
@@ -96,7 +93,6 @@ class MaestroOrchestrator:
                     cost=cached["cost"],
                     confidence=cached["confidence"],
                     num_documents=len(cached["documents"]),
-                    context_relevance=context_relevance,
                 )
 
                 return cached
@@ -143,11 +139,6 @@ class MaestroOrchestrator:
         # Calculate total latency
         latency_ms = (time.time() - start_time) * 1000
 
-        # STEP 8.5: Calculate context relevance
-        context_relevance = self._calculate_context_relevance(
-            [self._serialize_doc(d) for d in documents]
-        )
-
         # STEP 9: Prepare result
         result = {
             "answer": answer,
@@ -159,7 +150,6 @@ class MaestroOrchestrator:
             "strategy": strategy.name,
             "complexity": complexity,
             "num_documents_retrieved": len(documents),
-            "context_relevance": context_relevance,
         }
 
         # STEP 10: Cache result (if high confidence)
@@ -183,7 +173,6 @@ class MaestroOrchestrator:
             cost=strategy.estimated_cost,
             confidence=confidence,
             num_documents=len(documents),
-            context_relevance=context_relevance,
         )
 
         return result
@@ -239,38 +228,6 @@ class MaestroOrchestrator:
 
         return confidence
 
-    def _calculate_context_relevance(self, documents: list) -> float:
-        """
-        Calculate context relevance from retrieved documents.
-        
-        Context relevance measures how well the retrieved documents match the query
-        by averaging their similarity scores. This is a critical metric for validating
-        that semantic caching maintains response quality when reusing documents from
-        similar queries.
-        
-        Args:
-            documents: List of document dicts with similarity_score field
-            
-        Returns:
-            Average similarity score (0.0 to 1.0), where higher is better
-            
-        WHY: This metric answers the question "Are the retrieved documents actually
-        relevant to the user's query?" It's especially important for cache hits,
-        where we're reusing documents from a previous similar query. If context
-        relevance is high for cached results, it validates that semantic caching
-        is working correctly.
-        """
-        if not documents:
-            return 0.0
-        
-        # Extract similarity scores from documents
-        scores = [d.get("similarity_score", 0.0) for d in documents]
-        
-        # Calculate average similarity across all documents
-        # This gives us a holistic view of document relevance
-        avg_similarity = sum(scores) / len(scores)
-        
-        return avg_similarity
 
     def _serialize_doc(self, doc: Dict) -> Dict:
         """Prepare document for JSON response"""
@@ -338,8 +295,8 @@ class MaestroOrchestrator:
         """Get time-series data for cumulative cost comparison (naive vs actual)"""
         return self.metrics.get_cumulative_cost_timeseries(bucket_seconds, num_buckets)
 
-    def get_context_relevance_timeseries(
+    def get_confidence_timeseries(
         self, bucket_seconds: int = 60, num_buckets: int = 20
     ) -> list:
-        """Get time-series data for context relevance (document-query similarity)"""
-        return self.metrics.get_context_relevance_timeseries(bucket_seconds, num_buckets)
+        """Get time-series data for confidence scores"""
+        return self.metrics.get_confidence_timeseries(bucket_seconds, num_buckets)

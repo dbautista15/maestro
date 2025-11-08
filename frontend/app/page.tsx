@@ -6,7 +6,7 @@ import MetricsCards from '@/components/MetricsCards';
 import ResultDisplay from '@/components/ResultDisplay';
 import AuditTrail from '@/components/AuditTrail';
 import AdversarialTester from '@/components/AdversarialTester';
-import { queryAPI, type QueryResponse, type Metrics, type RecentQuery, type QueryTimeSeriesDataPoint, type CacheHitRateTimeSeriesDataPoint, type AvgCostTimeSeriesDataPoint, type AvgLatencyTimeSeriesDataPoint, type CumulativeCostTimeSeriesDataPoint, type ContextRelevanceTimeSeriesDataPoint } from '@/lib/api';
+import { queryAPI, type QueryResponse, type Metrics, type RecentQuery, type QueryTimeSeriesDataPoint, type CacheHitRateTimeSeriesDataPoint, type AvgCostTimeSeriesDataPoint, type AvgLatencyTimeSeriesDataPoint, type CumulativeCostTimeSeriesDataPoint, type ConfidenceTimeSeriesDataPoint } from '@/lib/api';
 import { AlertCircle } from 'lucide-react';
 
 export default function Dashboard() {
@@ -20,7 +20,7 @@ export default function Dashboard() {
   const [avgCostTimeSeries, setAvgCostTimeSeries] = useState<AvgCostTimeSeriesDataPoint[]>([]);
   const [avgLatencyTimeSeries, setAvgLatencyTimeSeries] = useState<AvgLatencyTimeSeriesDataPoint[]>([]);
   const [cumulativeCostTimeSeries, setCumulativeCostTimeSeries] = useState<CumulativeCostTimeSeriesDataPoint[]>([]);
-  const [contextRelevanceTimeSeries, setContextRelevanceTimeSeries] = useState<ContextRelevanceTimeSeriesDataPoint[]>([]);
+  const [confidenceTimeSeries, setConfidenceTimeSeries] = useState<ConfidenceTimeSeriesDataPoint[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch metrics on mount and every 5 seconds
@@ -32,7 +32,7 @@ export default function Dashboard() {
     fetchAvgCostTimeSeries();
     fetchAvgLatencyTimeSeries();
     fetchCumulativeCostTimeSeries();
-    fetchContextRelevanceTimeSeries();
+    fetchConfidenceTimeSeries();
 
     const interval = setInterval(() => {
       fetchMetrics();
@@ -42,7 +42,7 @@ export default function Dashboard() {
       fetchAvgCostTimeSeries();
       fetchAvgLatencyTimeSeries();
       fetchCumulativeCostTimeSeries();
-      fetchContextRelevanceTimeSeries();
+      fetchConfidenceTimeSeries();
     }, 5000); // Update every 5 seconds
 
     return () => clearInterval(interval);
@@ -111,12 +111,12 @@ export default function Dashboard() {
     }
   };
 
-  const fetchContextRelevanceTimeSeries = async () => {
+  const fetchConfidenceTimeSeries = async () => {
     try {
-      const data = await queryAPI.getContextRelevanceTimeSeries(60, 20);
-      setContextRelevanceTimeSeries(data);
+      const data = await queryAPI.getConfidenceTimeSeries(60, 20);
+      setConfidenceTimeSeries(data);
     } catch (err) {
-      console.error('Failed to fetch context relevance time series:', err);
+      console.error('Failed to fetch confidence time series:', err);
     }
   };
 
@@ -140,7 +140,7 @@ export default function Dashboard() {
       await fetchAvgCostTimeSeries();
       await fetchAvgLatencyTimeSeries();
       await fetchCumulativeCostTimeSeries();
-      await fetchContextRelevanceTimeSeries();
+      await fetchConfidenceTimeSeries();
 
     } catch (err: any) {
       console.error('Query failed:', err);
@@ -209,7 +209,7 @@ export default function Dashboard() {
                   avgCostTimeSeries={avgCostTimeSeries}
                   avgLatencyTimeSeries={avgLatencyTimeSeries}
                   cumulativeCostTimeSeries={cumulativeCostTimeSeries}
-                  contextRelevanceTimeSeries={contextRelevanceTimeSeries}
+                  confidenceTimeSeries={confidenceTimeSeries}
                 />
               )}
 

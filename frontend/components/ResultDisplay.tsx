@@ -82,7 +82,7 @@ export default function ResultDisplay({ result }: ResultDisplayProps) {
             <p className="text-sm text-gray-700 leading-relaxed">{result.answer}</p>
 
             {/* Metrics row */}
-            <div className="grid grid-cols-4 gap-0">
+            <div className="grid grid-cols-3 gap-0">
               <div className="flex items-center gap-1 text-xs">
                 <Clock size={14} className="text-gray-400" />
                 <span className="font-medium">{Math.round(result.latency)}ms</span>
@@ -94,10 +94,6 @@ export default function ResultDisplay({ result }: ResultDisplayProps) {
               <div className="flex items-center gap-1 text-xs">
                 <FileText size={14} className="text-gray-400" />
                 <span className="font-medium">{result.documents.length} docs</span>
-              </div>
-              <div className="flex items-center gap-1 text-xs">
-                <FileCheck size={14} className="text-gray-400" />
-                <span className="font-medium">{((result.contextRelevance ?? 0) * 100).toFixed(0)}%</span>
               </div>
             </div>
           </div>

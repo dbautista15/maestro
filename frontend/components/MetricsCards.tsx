@@ -35,9 +35,9 @@ interface CumulativeCostTimeSeriesDataPoint {
   queryCount: number;
 }
 
-interface ContextRelevanceTimeSeriesDataPoint {
+interface ConfidenceTimeSeriesDataPoint {
   timestamp: number;
-  avgRelevance: number;
+  avgConfidence: number;
   queryCount: number;
 }
 
@@ -49,17 +49,17 @@ interface MetricsCardsProps {
     totalCost: number;
     costSaved: number;
     avgLatency: number;
-    avgContextRelevance: number;
+    avgConfidence: number;
   };
   queryTimeSeries?: QueryTimeSeriesDataPoint[];
   cacheHitRateTimeSeries?: CacheHitRateTimeSeriesDataPoint[];
   avgCostTimeSeries?: AvgCostTimeSeriesDataPoint[];
   avgLatencyTimeSeries?: AvgLatencyTimeSeriesDataPoint[];
   cumulativeCostTimeSeries?: CumulativeCostTimeSeriesDataPoint[];
-  contextRelevanceTimeSeries?: ContextRelevanceTimeSeriesDataPoint[];
+  confidenceTimeSeries?: ConfidenceTimeSeriesDataPoint[];
 }
 
-export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRateTimeSeries = [], avgCostTimeSeries = [], avgLatencyTimeSeries = [], cumulativeCostTimeSeries = [], contextRelevanceTimeSeries = [] }: MetricsCardsProps) {
+export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRateTimeSeries = [], avgCostTimeSeries = [], avgLatencyTimeSeries = [], cumulativeCostTimeSeries = [], confidenceTimeSeries = [] }: MetricsCardsProps) {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   // Format numbers
@@ -130,18 +130,18 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
     }));
   }, [cumulativeCostTimeSeries]);
 
-  // Use real time-series data from backend for context relevance
-  const contextRelevanceData = useMemo(() => {
-    return contextRelevanceTimeSeries.map(point => ({
+  // Use real time-series data from backend for confidence
+  const confidenceData = useMemo(() => {
+    return confidenceTimeSeries.map(point => ({
       timestamp: point.timestamp,
-      relevance: point.avgRelevance,
-      relevancePercent: point.avgRelevance * 100,
+      confidence: point.avgConfidence,
+      confidencePercent: point.avgConfidence * 100,
       time: new Date(point.timestamp).toLocaleTimeString('en-US', { 
         hour: '2-digit', 
         minute: '2-digit' 
       }),
     }));
-  }, [contextRelevanceTimeSeries]);
+  }, [confidenceTimeSeries]);
 
   const toggleCard = (cardId: string) => {
     setExpandedCard(expandedCard === cardId ? null : cardId);
@@ -262,23 +262,23 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
         />
       </div>
 
-      {/* Context Relevance - Expandable */}
-      <div className={`${expandedCard === 'context-relevance' ? 'md:col-span-2 lg:col-span-3' : ''}`}>
+      {/* Confidence - Expandable */}
+      <div className={`${expandedCard === 'confidence' ? 'md:col-span-2 lg:col-span-3' : ''}`}>
         <ExpandableMetricCard
-          id="context-relevance"
-          title="Context Relevance"
-          value={formatPercent(metrics.avgContextRelevance ?? 0)}
-          subtitle={metrics.avgContextRelevance > 0.35 ? "High quality" : "Moderate"}
+          id="confidence"
+          title="Confidence"
+          value={formatPercent(metrics.avgConfidence ?? 0)}
+          subtitle={metrics.avgConfidence > 0.85 ? "High quality" : "Moderate"}
           icon={<FileCheck size={24} />}
           color="green"
-          trend={metrics.avgContextRelevance > 0.35 ? 'up' : undefined}
-          isExpanded={expandedCard === 'context-relevance'}
+          trend={metrics.avgConfidence > 0.85 ? 'up' : undefined}
+          isExpanded={expandedCard === 'confidence'}
           onToggle={toggleCard}
            chart={
              <div>
-               <h3 className="text-lg font-semibold mb-4 text-gray-700">Cumulative Context Relevance</h3>
+               <h3 className="text-lg font-semibold mb-4 text-gray-700">Cumulative Confidence</h3>
                <ResponsiveContainer width="100%" height={300}>
-                 <LineChart data={contextRelevanceData}>
+                 <LineChart data={confidenceData}>
                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                    <XAxis 
                      dataKey="time" 
@@ -290,7 +290,7 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
                      stroke="#6b7280"
                      domain={[0, 100]}
                      tickFormatter={(val) => `${val.toFixed(0)}%`}
-                     label={{ value: 'Relevance (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+                     label={{ value: 'Confidence (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
                    />
                    <Tooltip 
                      contentStyle={{ 
@@ -304,17 +304,17 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
                    />
                    <Line 
                      type="monotone" 
-                     dataKey="relevancePercent" 
+                     dataKey="confidencePercent" 
                      stroke="#10b981" 
                      strokeWidth={2}
                      dot={{ fill: '#10b981', r: 3 }}
                      activeDot={{ r: 5 }}
-                     name="Relevance"
+                     name="Confidence"
                    />
                  </LineChart>
                </ResponsiveContainer>
                <p className="text-sm text-gray-600 mt-4">
-                 Shows average document-query similarity score over time. This validates that semantic caching maintains response quality when reusing documents from similar queries. Higher values indicate better document relevance.
+                 Shows system confidence scores over time. This validates that semantic caching maintains response quality when reusing documents from similar queries. Higher values indicate better document relevance and system confidence.
                </p>
              </div>
            }

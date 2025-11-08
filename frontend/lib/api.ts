@@ -37,7 +37,6 @@ export interface QueryResponse {
   cacheSimilarity?: number;
   originalQuery?: string;
   hitCount?: number;
-  contextRelevance?: number;
 }
 
 export interface Metrics {
@@ -47,7 +46,7 @@ export interface Metrics {
   avgLatency: number;
   totalCost: number;
   costSaved: number;
-  avgContextRelevance: number;
+  avgConfidence: number;
   breakdownByStrategy?: Record<string, number>;
   cacheSize?: number;
 }
@@ -60,7 +59,6 @@ export interface RecentQuery {
   latency: number;
   cost: number;
   confidence: number;
-  contextRelevance: number;
 }
 
 export interface QueryTimeSeriesDataPoint {
@@ -94,9 +92,9 @@ export interface CumulativeCostTimeSeriesDataPoint {
   queryCount: number;
 }
 
-export interface ContextRelevanceTimeSeriesDataPoint {
+export interface ConfidenceTimeSeriesDataPoint {
   timestamp: number;
-  avgRelevance: number;
+  avgConfidence: number;
   queryCount: number;
 }
 
@@ -130,7 +128,6 @@ export const queryAPI = {
         cacheSimilarity: data.cache_similarity ?? data.cacheSimilarity,
         originalQuery: data.original_query ?? data.originalQuery,
         hitCount: data.hit_count ?? data.hitCount,
-        contextRelevance: data.context_relevance ?? data.contextRelevance,
       };
     } catch (error: any) {
       // If timeout on first attempt (cold start), retry once
@@ -158,7 +155,6 @@ export const queryAPI = {
           cacheSimilarity: data.cache_similarity ?? data.cacheSimilarity,
           originalQuery: data.original_query ?? data.originalQuery,
           hitCount: data.hit_count ?? data.hitCount,
-          contextRelevance: data.context_relevance ?? data.contextRelevance,
         };
       }
       // Re-throw other errors
@@ -181,7 +177,7 @@ export const queryAPI = {
       avgLatency: data.avg_latency_ms ?? data.avgLatency ?? 0, // Backend sends avg_latency_ms
       totalCost: data.total_cost ?? data.totalCost ?? 0,
       costSaved: data.cost_saved ?? data.costSaved ?? 0,
-      avgContextRelevance: data.avg_context_relevance ?? data.avgContextRelevance ?? 0,
+      avgConfidence: data.avg_confidence ?? data.avgConfidence ?? 0,
       breakdownByStrategy: data.breakdown_by_strategy ?? data.breakdownByStrategy,
       cacheSize: data.cache_size ?? data.cacheSize,
     };
@@ -203,7 +199,6 @@ export const queryAPI = {
       latency: q.latency_ms ?? q.latency, // Backend sends latency_ms
       cost: q.cost,
       confidence: q.confidence,
-      contextRelevance: q.context_relevance ?? q.contextRelevance ?? 0,
     }));
   },
 
@@ -279,15 +274,15 @@ export const queryAPI = {
   },
 
   /**
-   * Get time-series data for context relevance (document-query similarity)
+   * Get time-series data for confidence scores
    */
-  async getContextRelevanceTimeSeries(bucketSeconds: number = 60, numBuckets: number = 20): Promise<ContextRelevanceTimeSeriesDataPoint[]> {
-    const response = await api.get(`/api/metrics/timeseries/context-relevance?bucket_seconds=${bucketSeconds}&num_buckets=${numBuckets}`);
+  async getConfidenceTimeSeries(bucketSeconds: number = 60, numBuckets: number = 20): Promise<ConfidenceTimeSeriesDataPoint[]> {
+    const response = await api.get(`/api/metrics/timeseries/confidence?bucket_seconds=${bucketSeconds}&num_buckets=${numBuckets}`);
     const data = response.data.data;
 
     return data.map((point: any) => ({
       timestamp: point.timestamp,
-      avgRelevance: point.avg_relevance ?? point.avgRelevance,
+      avgConfidence: point.avg_confidence ?? point.avgConfidence,
       queryCount: point.query_count ?? point.queryCount,
     }));
   },

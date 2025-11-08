@@ -70,10 +70,6 @@ export default function AuditTrail({ queries }: AuditTrailProps) {
                       <Zap size={14} />
                       {(query.confidence * 100).toFixed(0)}%
                     </span>
-                    <span className="flex items-center gap-1 text-xs">
-                      <FileCheck size={14} />
-                      {(query.contextRelevance * 100).toFixed(0)}%
-                    </span>
                   </div>
                 </div>
                 <div className="text-xs text-gray-400">
