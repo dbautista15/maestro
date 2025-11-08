@@ -138,16 +138,17 @@ async def get_query_timeseries(bucket_seconds: int = 60, num_buckets: int = 20):
 @app.get("/api/metrics/timeseries/cache-hit-rate")
 async def get_cache_hit_rate_timeseries(bucket_seconds: int = 60, num_buckets: int = 20):
     """
-    Get time-series data for cache hit rate.
+    Get time-series data for cumulative cache hit rate.
     
-    Returns cache hit rate per time bucket for trend visualization.
+    Returns cumulative cache hit rate up to each time point for trend visualization.
     
     Args:
         bucket_seconds: Size of each time bucket in seconds (default: 60 = 1 minute)
         num_buckets: Number of time buckets to return (default: 20)
         
     WHY: Frontend needs time-series data to show cache effectiveness over time.
-    This helps managers understand cache warming patterns and optimization impact.
+    Cumulative rate shows the overall trend and helps managers understand if
+    the cache is consistently improving query performance.
     """
     try:
         return {"data": orchestrator.get_cache_hit_rate_timeseries(bucket_seconds, num_buckets)}

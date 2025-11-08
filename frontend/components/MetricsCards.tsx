@@ -226,50 +226,50 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
           trend={metrics.cacheHitRate > 0.5 ? 'up' : undefined}
           isExpanded={expandedCard === 'cache-hit-rate'}
           onToggle={toggleCard}
-          chart={
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-700">Cache Hit Rate Trend</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={cacheHitRateData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis 
-                    dataKey="time" 
-                    tick={{ fontSize: 12 }}
-                    stroke="#6b7280"
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 12 }}
-                    stroke="#6b7280"
-                    domain={[0, 100]}
-                    tickFormatter={(val) => `${val.toFixed(0)}%`}
-                    label={{ value: 'Hit Rate (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#fff', 
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      padding: '8px'
-                    }}
-                    labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
-                    formatter={(value: number) => `${value.toFixed(1)}%`}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="hitRatePercent" 
-                    stroke="#10b981" 
-                    strokeWidth={2}
-                    dot={{ fill: '#10b981', r: 3 }}
-                    activeDot={{ r: 5 }}
-                    name="Hit Rate"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-              <p className="text-sm text-gray-600 mt-4">
-                Monitor cache effectiveness over time. A rising trend indicates the cache is warming up and improving query performance.
-              </p>
-            </div>
-          }
+           chart={
+             <div>
+               <h3 className="text-lg font-semibold mb-4 text-gray-700">Cumulative Cache Hit Rate</h3>
+               <ResponsiveContainer width="100%" height={300}>
+                 <LineChart data={cacheHitRateData}>
+                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                   <XAxis 
+                     dataKey="time" 
+                     tick={{ fontSize: 12 }}
+                     stroke="#6b7280"
+                   />
+                   <YAxis 
+                     tick={{ fontSize: 12 }}
+                     stroke="#6b7280"
+                     domain={[0, 100]}
+                     tickFormatter={(val) => `${val.toFixed(0)}%`}
+                     label={{ value: 'Hit Rate (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+                   />
+                   <Tooltip 
+                     contentStyle={{ 
+                       backgroundColor: '#fff', 
+                       border: '1px solid #e5e7eb',
+                       borderRadius: '8px',
+                       padding: '8px'
+                     }}
+                     labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
+                     formatter={(value: number) => `${value.toFixed(1)}%`}
+                   />
+                   <Line 
+                     type="monotone" 
+                     dataKey="hitRatePercent" 
+                     stroke="#10b981" 
+                     strokeWidth={2}
+                     dot={{ fill: '#10b981', r: 3 }}
+                     activeDot={{ r: 5 }}
+                     name="Hit Rate"
+                   />
+                 </LineChart>
+               </ResponsiveContainer>
+               <p className="text-sm text-gray-600 mt-4">
+                 Shows overall cache hit rate from the start of the time window. A rising trend indicates the cache is warming up and consistently improving query performance.
+               </p>
+             </div>
+           }
         />
       </div>
 
