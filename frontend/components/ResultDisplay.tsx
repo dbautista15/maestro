@@ -49,7 +49,7 @@ export default function ResultDisplay({ result }: ResultDisplayProps) {
         </div>
 
         {/* Answer */}
-        <h3 className="text-md font-semibold mb-1 flex items-center gap-2">
+        <h3 className="text-sm font-semibold mb-1 flex items-center gap-2">
           {result.confidence > 0.9 ? (
             <CheckCircle className="text-green-600" size={20} />
           ) : (
@@ -78,19 +78,19 @@ export default function ResultDisplay({ result }: ResultDisplayProps) {
 
       {/* Documents */}
       {result.documents.length > 0 && (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold mb-4">
-            Source Documents
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+          <h3 className="text-sm font-semibold mb-4">
+            Documents
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {result.documents.map((doc, idx) => (
-              <div key={doc.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-800 font-medium text-sm">
+              <div key={doc.id} className="flex items-start gap-2 p-2 bg-gray-100 rounded">
+                <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-800 font-medium text-sm">
                   {idx + 1}
                 </div>
                 <div className="flex-1">
-                  <div className="font-medium text-gray-900">{doc.title}</div>
-                  <div className="text-sm text-gray-600 mt-1">{doc.contentPreview}</div>
+                  <div className="text-sm text-gray-900">{doc.title}</div>
+                  <div className="text-xs text-gray-600 mt-1">{doc.contentPreview}</div>
                   <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                     <span>Relevance: {(doc.similarityScore * 100).toFixed(1)}%</span>
                     {doc.category && <span>Category: {doc.category}</span>}
