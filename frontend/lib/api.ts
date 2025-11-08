@@ -71,6 +71,12 @@ export interface CacheHitRateTimeSeriesDataPoint {
   totalQueries: number;
 }
 
+export interface AvgCostTimeSeriesDataPoint {
+  timestamp: number;
+  avgCost: number;
+  queryCount: number;
+}
+
 export const queryAPI = {
   /**
    * Submit a query to the orchestrator
@@ -198,6 +204,20 @@ export const queryAPI = {
       timestamp: point.timestamp,
       hitRate: point.hit_rate ?? point.hitRate,
       totalQueries: point.total_queries ?? point.totalQueries,
+    }));
+  },
+
+  /**
+   * Get time-series data for average cost per query
+   */
+  async getAvgCostTimeSeries(bucketSeconds: number = 60, numBuckets: number = 20): Promise<AvgCostTimeSeriesDataPoint[]> {
+    const response = await api.get(`/api/metrics/timeseries/avg-cost?bucket_seconds=${bucketSeconds}&num_buckets=${numBuckets}`);
+    const data = response.data.data;
+
+    return data.map((point: any) => ({
+      timestamp: point.timestamp,
+      avgCost: point.avg_cost ?? point.avgCost,
+      queryCount: point.query_count ?? point.queryCount,
     }));
   },
 

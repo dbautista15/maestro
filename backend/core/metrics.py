@@ -234,3 +234,71 @@ class MetricsCollector:
             })
         
         return result
+
+    def get_avg_cost_timeseries(
+        self, bucket_seconds: int = 60, num_buckets: int = 20
+    ) -> List[Dict]:
+        """
+        Get time-series data for cumulative average cost per query.
+        
+        Calculates cumulative average cost per query up to each time bucket.
+        Shows overall cost effectiveness from the start to each point in time.
+        
+        Args:
+            bucket_seconds: Size of each time bucket in seconds (default: 60 = 1 minute)
+            num_buckets: Number of time buckets to return (default: 20)
+            
+        Returns:
+            List of dicts with timestamp and cumulative average cost per query
+            
+        WHY: Frontend needs time-series data to show cost optimization trends.
+        Cumulative average shows the overall trend and helps managers understand
+        if the system is becoming more cost-efficient over time (from cache warming
+        and smart routing).
+        """
+        if not self.queries:
+            return []
+        
+        # Get time range
+        now = time.time()
+        earliest_time = now - (bucket_seconds * num_buckets)
+        
+        # Create buckets to track total cost and query count
+        buckets = defaultdict(lambda: {"total_cost": 0.0, "query_count": 0})
+        
+        # Bucket each query by its timestamp
+        for query in self.queries:
+            if query.timestamp >= earliest_time:
+                # Calculate which bucket this query belongs to
+                bucket_index = int((query.timestamp - earliest_time) / bucket_seconds)
+                bucket_time = earliest_time + (bucket_index * bucket_seconds)
+                
+                buckets[bucket_time]["total_cost"] += query.cost
+                buckets[bucket_time]["query_count"] += 1
+        
+        # Build result with cumulative average costs
+        result = []
+        cumulative_total_cost = 0.0
+        cumulative_query_count = 0
+        
+        for i in range(num_buckets):
+            bucket_time = earliest_time + (i * bucket_seconds)
+            bucket_data = buckets.get(bucket_time, {"total_cost": 0.0, "query_count": 0})
+            
+            # Add this bucket's data to cumulative totals
+            cumulative_total_cost += bucket_data["total_cost"]
+            cumulative_query_count += bucket_data["query_count"]
+            
+            # Calculate cumulative average cost (avoid division by zero)
+            if cumulative_query_count > 0:
+                avg_cost = cumulative_total_cost / cumulative_query_count
+            else:
+                avg_cost = 0.0
+            
+            result.append({
+                "timestamp": int(bucket_time * 1000),  # Convert to milliseconds for JS
+                "avg_cost": avg_cost,  # Cumulative average cost per query
+                "query_count": cumulative_query_count,  # For context
+            })
+        
+        return result

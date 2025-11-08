@@ -5,7 +5,7 @@ import QueryInput from '@/components/QueryInput';
 import MetricsCards from '@/components/MetricsCards';
 import ResultDisplay from '@/components/ResultDisplay';
 import AuditTrail from '@/components/AuditTrail';
-import { queryAPI, type QueryResponse, type Metrics, type RecentQuery, type QueryTimeSeriesDataPoint, type CacheHitRateTimeSeriesDataPoint } from '@/lib/api';
+import { queryAPI, type QueryResponse, type Metrics, type RecentQuery, type QueryTimeSeriesDataPoint, type CacheHitRateTimeSeriesDataPoint, type AvgCostTimeSeriesDataPoint } from '@/lib/api';
 import { AlertCircle } from 'lucide-react';
 
 export default function Dashboard() {
@@ -16,6 +16,7 @@ export default function Dashboard() {
   const [recentQueries, setRecentQueries] = useState<RecentQuery[]>([]);
   const [queryTimeSeries, setQueryTimeSeries] = useState<QueryTimeSeriesDataPoint[]>([]);
   const [cacheHitRateTimeSeries, setCacheHitRateTimeSeries] = useState<CacheHitRateTimeSeriesDataPoint[]>([]);
+  const [avgCostTimeSeries, setAvgCostTimeSeries] = useState<AvgCostTimeSeriesDataPoint[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch metrics on mount and every 5 seconds
@@ -24,12 +25,14 @@ export default function Dashboard() {
     fetchRecentQueries();
     fetchQueryTimeSeries();
     fetchCacheHitRateTimeSeries();
+    fetchAvgCostTimeSeries();
 
     const interval = setInterval(() => {
       fetchMetrics();
       fetchRecentQueries();
       fetchQueryTimeSeries();
       fetchCacheHitRateTimeSeries();
+      fetchAvgCostTimeSeries();
     }, 5000); // Update every 5 seconds
 
     return () => clearInterval(interval);
@@ -71,6 +74,15 @@ export default function Dashboard() {
     }
   };
 
+  const fetchAvgCostTimeSeries = async () => {
+    try {
+      const data = await queryAPI.getAvgCostTimeSeries(60, 20);
+      setAvgCostTimeSeries(data);
+    } catch (err) {
+      console.error('Failed to fetch avg cost time series:', err);
+    }
+  };
+
   const handleQuery = async (query: string, strategy?: string) => {
     setLoading(true);
     setError(null);
@@ -88,6 +100,7 @@ export default function Dashboard() {
       await fetchRecentQueries();
       await fetchQueryTimeSeries();
       await fetchCacheHitRateTimeSeries();
+      await fetchAvgCostTimeSeries();
 
     } catch (err: any) {
       console.error('Query failed:', err);
@@ -153,6 +166,7 @@ export default function Dashboard() {
                   metrics={metrics} 
                   queryTimeSeries={queryTimeSeries}
                   cacheHitRateTimeSeries={cacheHitRateTimeSeries}
+                  avgCostTimeSeries={avgCostTimeSeries}
                 />
               )}
             </div>

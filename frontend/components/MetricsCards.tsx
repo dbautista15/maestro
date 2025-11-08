@@ -15,6 +15,12 @@ interface CacheHitRateTimeSeriesDataPoint {
   totalQueries: number;
 }
 
+interface AvgCostTimeSeriesDataPoint {
+  timestamp: number;
+  avgCost: number;
+  queryCount: number;
+}
+
 interface MetricsCardsProps {
   metrics: {
     totalQueries: number;
@@ -26,9 +32,10 @@ interface MetricsCardsProps {
   };
   queryTimeSeries?: QueryTimeSeriesDataPoint[];
   cacheHitRateTimeSeries?: CacheHitRateTimeSeriesDataPoint[];
+  avgCostTimeSeries?: AvgCostTimeSeriesDataPoint[];
 }
 
-export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRateTimeSeries = [] }: MetricsCardsProps) {
+export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRateTimeSeries = [], avgCostTimeSeries = [] }: MetricsCardsProps) {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   // Format numbers
@@ -61,34 +68,17 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
     }));
   }, [cacheHitRateTimeSeries]);
 
-  // Generate mock time-series data for Avg Cost
-  // TODO: Replace with actual backend time-series data
+  // Use real time-series data from backend for average cost
   const avgCostData = useMemo(() => {
-    const now = Date.now();
-    const dataPoints = 20;
-    const intervalMs = 60000; // 1 minute intervals
-    const naiveCost = 0.018; // Naive RAG cost baseline
-    
-    return Array.from({ length: dataPoints }, (_, i) => {
-      const timestamp = now - (dataPoints - i - 1) * intervalMs;
-      // Simulate cost optimization over time (decreasing as cache warms)
-      const initialCost = naiveCost * 0.9; // Start at 90% of naive
-      const finalCost = metrics.avgCost;
-      const progress = i / dataPoints;
-      const baseCost = initialCost - (initialCost - finalCost) * progress;
-      const variance = (Math.random() * 0.002 - 0.001); // Small variance
-      const cost = Math.max(0, baseCost + variance);
-      
-      return {
-        timestamp,
-        cost: cost,
-        time: new Date(timestamp).toLocaleTimeString('en-US', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        }),
-      };
-    });
-  }, [metrics.avgCost]);
+    return avgCostTimeSeries.map(point => ({
+      timestamp: point.timestamp,
+      cost: point.avgCost,
+      time: new Date(point.timestamp).toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }),
+    }));
+  }, [avgCostTimeSeries]);
 
   // Generate mock time-series data for Avg Response Time
   // TODO: Replace with actual backend time-series data
@@ -285,60 +275,60 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
           trend={metrics.avgCost < 0.010 ? 'down' : undefined}
           isExpanded={expandedCard === 'avg-cost'}
           onToggle={toggleCard}
-          chart={
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-700">Average Cost per Query Over Time</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={avgCostData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis 
-                    dataKey="time" 
-                    tick={{ fontSize: 12 }}
-                    stroke="#6b7280"
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 12 }}
-                    stroke="#6b7280"
-                    tickFormatter={(val) => `$${val.toFixed(4)}`}
-                    label={{ value: 'Cost ($)', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#fff', 
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      padding: '8px'
-                    }}
-                    labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
-                    formatter={(value: number) => `$${value.toFixed(4)}`}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="cost" 
-                    stroke="#3b82f6" 
-                    strokeWidth={2}
-                    dot={{ fill: '#3b82f6', r: 3 }}
-                    activeDot={{ r: 5 }}
-                    name="Avg Cost"
-                  />
-                  {/* Reference line for naive cost */}
-                  <Line 
-                    type="monotone" 
-                    dataKey={() => 0.018} 
-                    stroke="#ef4444" 
-                    strokeWidth={1}
-                    strokeDasharray="5 5"
-                    dot={false}
-                    name="Naive RAG Cost"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-              <p className="text-sm text-gray-600 mt-4">
-                Track cost optimization over time. The dashed red line shows the baseline naive RAG cost ($0.018). 
-                Lower values indicate better cost efficiency through caching and smart routing.
-              </p>
-            </div>
-          }
+           chart={
+             <div>
+               <h3 className="text-lg font-semibold mb-4 text-gray-700">Cumulative Average Cost per Query</h3>
+               <ResponsiveContainer width="100%" height={300}>
+                 <LineChart data={avgCostData}>
+                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                   <XAxis 
+                     dataKey="time" 
+                     tick={{ fontSize: 12 }}
+                     stroke="#6b7280"
+                   />
+                   <YAxis 
+                     tick={{ fontSize: 12 }}
+                     stroke="#6b7280"
+                     tickFormatter={(val) => `$${val.toFixed(4)}`}
+                     label={{ value: 'Cost ($)', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+                   />
+                   <Tooltip 
+                     contentStyle={{ 
+                       backgroundColor: '#fff', 
+                       border: '1px solid #e5e7eb',
+                       borderRadius: '8px',
+                       padding: '8px'
+                     }}
+                     labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
+                     formatter={(value: number) => `$${value.toFixed(4)}`}
+                   />
+                   <Line 
+                     type="monotone" 
+                     dataKey="cost" 
+                     stroke="#3b82f6" 
+                     strokeWidth={2}
+                     dot={{ fill: '#3b82f6', r: 3 }}
+                     activeDot={{ r: 5 }}
+                     name="Avg Cost"
+                   />
+                   {/* Reference line for naive cost */}
+                   <Line 
+                     type="monotone" 
+                     dataKey={() => 0.018} 
+                     stroke="#ef4444" 
+                     strokeWidth={1}
+                     strokeDasharray="5 5"
+                     dot={false}
+                     name="Naive RAG Cost"
+                   />
+                 </LineChart>
+               </ResponsiveContainer>
+               <p className="text-sm text-gray-600 mt-4">
+                 Shows overall average cost per query from the start of the time window. The dashed red line shows the baseline naive RAG cost ($0.018). 
+                 Declining values indicate improving cost efficiency through caching and smart routing.
+               </p>
+             </div>
+           }
         />
       </div>
 
