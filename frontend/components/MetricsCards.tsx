@@ -148,7 +148,7 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
       {/* Total Queries - Expandable */}
       <div className={`${expandedCard === 'total-queries' ? 'md:col-span-2 lg:col-span-3' : ''}`}>
         <ExpandableMetricCard
@@ -209,7 +209,6 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
           id="cache-hit-rate"
           title="Cache Hit Rate"
           value={formatPercent(metrics.cacheHitRate ?? 0)}
-          subtitle={metrics.cacheHitRate > 0.5 ? "Excellent" : "Building cache..."}
           icon={<Zap size={24} />}
           color="green"
           trend={metrics.cacheHitRate > 0.5 ? 'up' : undefined}
@@ -268,7 +267,6 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
           id="confidence"
           title="Confidence"
           value={formatPercent(metrics.avgConfidence ?? 0)}
-          subtitle={metrics.avgConfidence > 0.85 ? "High quality" : "Moderate"}
           icon={<FileCheck size={24} />}
           color="green"
           trend={metrics.avgConfidence > 0.85 ? 'up' : undefined}
@@ -327,7 +325,6 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
           id="avg-cost"
           title="Avg Cost/Query"
           value={formatCost(metrics.avgCost ?? 0)}
-          subtitle="vs $0.018 naive"
           icon={<DollarSign size={24} />}
           color="blue"
           trend={metrics.avgCost < 0.010 ? 'down' : undefined}
@@ -396,7 +393,6 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
           id="avg-latency"
           title="Avg Response Time"
           value={formatMs(metrics.avgLatency ?? 0)}
-          subtitle="P50 latency"
           icon={<Clock size={24} />}
           color="blue"
           isExpanded={expandedCard === 'avg-latency'}
@@ -454,7 +450,6 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
           id="total-saved"
           title="Total Saved"
           value={formatCost(metrics.costSaved ?? 0)}
-          subtitle={`${((metrics.costSaved / (metrics.totalCost + metrics.costSaved)) * 100).toFixed(0)}% reduction`}
           icon={<TrendingDown size={24} />}
           color="purple"
           trend="down"
@@ -597,34 +592,23 @@ function ExpandableMetricCard({
     <div className="rounded-lg overflow-hidden transition-all">
       {/* Card Header - Clickable */}
       <div 
-        className={`p-6 ${colorClasses[color]} transition-all hover:shadow-lg cursor-pointer`}
+        className={`p-3 ${colorClasses[color]} transition-all hover:shadow-lg cursor-pointer`}
         onClick={() => onToggle(id)}
       >
-        <div className="flex items-start justify-between mb-2">
-          <div className="text-sm font-medium opacity-80">{title}</div>
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-baseline gap-2">
             <div className="opacity-60">{icon}</div>
-            <div className="opacity-60">
-              {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-            </div>
+            <div className="text-sm font-medium opacity-80">{title}</div>
+            <div className="text-md font-bold">{value}</div>
+            {trend && (
+              <div className={`text-sm ${trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                {trend === 'up' ? '↑' : '↓'}
+              </div>
+            )}
           </div>
-        </div>
-        
-        <div className="flex items-baseline gap-2">
-          <div className="text-3xl font-bold">{value}</div>
-          {trend && (
-            <div className={`text-sm ${trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-              {trend === 'up' ? '↑' : '↓'}
-            </div>
-          )}
-        </div>
-        
-        {subtitle && (
-          <div className="mt-1 text-xs opacity-70">{subtitle}</div>
-        )}
-        
-        <div className="mt-2 text-xs opacity-60">
-          Click to {isExpanded ? 'collapse' : 'expand'} details
+          <div className="opacity-60">
+            {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </div>
         </div>
       </div>
       

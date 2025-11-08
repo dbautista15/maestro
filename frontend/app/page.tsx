@@ -171,7 +171,7 @@ export default function Dashboard() {
 
       {/* Main content */}
       <main className="flex-1 overflow-auto w-full max-w-full px-4 py-4 min-h-0">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 min-h-full min-w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-full min-w-full">
           {/* Left Column - Interactions */}
           <div className="lg:col-span-1 space-y-2 flex flex-col h-full">
             {/* Query input */}
@@ -201,7 +201,7 @@ export default function Dashboard() {
 
           {/* Right Column - Metrics */}
           <div className="lg:col-span-2 h-full">
-            <div className="lg:sticky lg:top-8 space-y-4">
+            <div className="lg:sticky space-y-2">
               {/* Performance Radar Chart */}
               {metrics && (
                 <PerformanceRadar
@@ -237,7 +237,7 @@ export default function Dashboard() {
       <footer className="bg-white border-t border-gray-200 flex-shrink-0">
         <div className="max-w-full mx-auto px-6 py-2 text-center text-sm text-gray-500">
           <p>
-            Built for AI ATL Hackathon • Powered by Gemini & Vertex AI
+            Built for AI ATL Hackathon • Powered by Gemini
           </p>
         </div>
       </footer>
