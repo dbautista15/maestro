@@ -75,18 +75,22 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="max-w-full mx-auto px-6 py-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Maestro</h1>
-            <p className="text-gray-600 mt-1">
-              Enterprise RAG Orchestration Platform
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Maestr
+              <img 
+                src="/favicon.ico" 
+                alt="o" 
+                className="w-4.25 h-4.25 mx-0.25 inline-block"
+              />
+            </h1>
           </div>
         </div>
       </header>
 
       {/* Main content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-full mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Interactions */}
           <div className="lg:col-span-1 space-y-8">
@@ -128,7 +132,7 @@ export default function Dashboard() {
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-16">
-        <div className="max-w-7xl mx-auto px-6 py-6 text-center text-sm text-gray-500">
+        <div className="max-w-full mx-auto px-6 py-6 text-center text-sm text-gray-500">
           <p>
             Built for AI ATL Hackathon • Powered by Gemini & Vertex AI
           </p>
