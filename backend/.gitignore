@@ -17,3 +17,6 @@ data/*.pkl
 # Python cache
 __pycache__/
 *.pyc
+
+# Downloaded models (large, will be cached on Railway)
+models/
