@@ -94,7 +94,7 @@ export default function Dashboard() {
             <ResultDisplay result={result} />
 
             {/* Query input */}
-            <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+            <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
               <QueryInput onSubmit={handleQuery} loading={loading} />
             </div>
 

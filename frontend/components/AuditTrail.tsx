@@ -18,7 +18,7 @@ export default function AuditTrail({ queries }: AuditTrailProps) {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-      <div className="px-6 py-4 border-b border-gray-200">
+      <div className="px-4 py-4 border-b border-gray-200">
         <h3 className="text-lg font-semibold">Recent Queries (Audit Trail)</h3>
         <p className="text-sm text-gray-500 mt-1">
           Full provenance tracking for compliance and debugging
@@ -27,7 +27,7 @@ export default function AuditTrail({ queries }: AuditTrailProps) {
       
       <div className="divide-y divide-gray-200">
         {queries.map((query, idx) => (
-          <div key={idx} className="px-6 py-4 hover:bg-gray-50 transition-colors">
+          <div key={idx} className="px-4 py-4 hover:bg-gray-50 transition-colors">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <div className="font-medium text-gray-900 mb-1">
