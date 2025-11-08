@@ -103,6 +103,34 @@ export default function MetricsCards({ metrics }: MetricsCardsProps) {
     });
   }, [metrics.avgCost]);
 
+  // Generate mock time-series data for Avg Response Time
+  // TODO: Replace with actual backend time-series data
+  const avgLatencyData = useMemo(() => {
+    const now = Date.now();
+    const dataPoints = 20;
+    const intervalMs = 60000; // 1 minute intervals
+    
+    return Array.from({ length: dataPoints }, (_, i) => {
+      const timestamp = now - (dataPoints - i - 1) * intervalMs;
+      // Simulate latency improvement over time (as cache warms, more cache hits = lower latency)
+      const initialLatency = metrics.avgLatency * 1.5; // Start higher
+      const finalLatency = metrics.avgLatency;
+      const progress = i / dataPoints;
+      const baseLatency = initialLatency - (initialLatency - finalLatency) * progress;
+      const variance = (Math.random() * 20 - 10); // ±10ms variance
+      const latency = Math.max(0, baseLatency + variance);
+      
+      return {
+        timestamp,
+        latency: Math.round(latency),
+        time: new Date(timestamp).toLocaleTimeString('en-US', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+      };
+    });
+  }, [metrics.avgLatency]);
+
   const toggleCard = (cardId: string) => {
     setExpandedCard(expandedCard === cardId ? null : cardId);
   };
@@ -300,14 +328,62 @@ export default function MetricsCards({ metrics }: MetricsCardsProps) {
         trend="down"
       />
 
-      {/* Avg Response Time */}
-      <MetricCard
-        title="Avg Response Time"
-        value={formatMs(metrics.avgLatency ?? 0)}
-        subtitle="P50 latency"
-        icon={<Clock size={24} />}
-        color="blue"
-      />
+      {/* Avg Response Time - Expandable */}
+      <div className={`${expandedCard === 'avg-latency' ? 'md:col-span-2 lg:col-span-3' : ''}`}>
+        <ExpandableMetricCard
+          id="avg-latency"
+          title="Avg Response Time"
+          value={formatMs(metrics.avgLatency ?? 0)}
+          subtitle="P50 latency"
+          icon={<Clock size={24} />}
+          color="blue"
+          isExpanded={expandedCard === 'avg-latency'}
+          onToggle={toggleCard}
+          chart={
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-gray-700">Response Time Trend</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={avgLatencyData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis 
+                    dataKey="time" 
+                    tick={{ fontSize: 12 }}
+                    stroke="#6b7280"
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12 }}
+                    stroke="#6b7280"
+                    tickFormatter={(val) => `${val}ms`}
+                    label={{ value: 'Latency (ms)', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#fff', 
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      padding: '8px'
+                    }}
+                    labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
+                    formatter={(value: number) => `${value}ms`}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="latency" 
+                    stroke="#3b82f6" 
+                    fill="#3b82f6" 
+                    fillOpacity={0.6}
+                    strokeWidth={2}
+                    name="Response Time"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+              <p className="text-sm text-gray-600 mt-4">
+                Monitor query response times. Lower latency indicates better performance. Cache hits significantly reduce response time compared to full retrieval.
+              </p>
+            </div>
+          }
+        />
+      </div>
 
       {/* Audit Coverage */}
       <MetricCard
