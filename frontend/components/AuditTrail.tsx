@@ -1,0 +1,67 @@
+'use client';
+
+import { Clock, DollarSign, Zap } from 'lucide-react';
+import type { RecentQuery } from '@/lib/api';
+
+interface AuditTrailProps {
+  queries: RecentQuery[];
+}
+
+export default function AuditTrail({ queries }: AuditTrailProps) {
+  if (queries.length === 0) {
+    return (
+      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center text-gray-500">
+        No queries yet. Submit a query to see the audit trail.
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <h3 className="text-lg font-semibold">Recent Queries (Audit Trail)</h3>
+        <p className="text-sm text-gray-500 mt-1">
+          Full provenance tracking for compliance and debugging
+        </p>
+      </div>
+      
+      <div className="divide-y divide-gray-200">
+        {queries.map((query, idx) => (
+          <div key={idx} className="px-6 py-4 hover:bg-gray-50 transition-colors">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <div className="font-medium text-gray-900 mb-1">
+                  {query.query}
+                </div>
+                <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                    query.source === 'cache' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-blue-100 text-blue-800'
+                  }`}>
+                    {query.source}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock size={14} />
+                    {Math.round(query.latency)}ms
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <DollarSign size={14} />
+                    ${query.cost.toFixed(4)}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Zap size={14} />
+                    {(query.confidence * 100).toFixed(0)}%
+                  </span>
+                </div>
+              </div>
+              <div className="text-xs text-gray-400">
+                {new Date(query.timestamp * 1000).toLocaleTimeString()}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
