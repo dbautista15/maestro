@@ -1,4 +1,4 @@
-# ScaleRAG Backend
+# Maestro Backend
 
 ## Structure
 

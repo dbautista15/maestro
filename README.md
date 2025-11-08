@@ -2,13 +2,13 @@
 
 AI ATL Hackathon Project
 
-# ScaleRAG / TrustRAG
+# Maestro
 
 Enterprise RAG orchestration layer for production deployments.
 
 ## For Google Track: Performance & Scalability
 
-**ScaleRAG** - RAG infrastructure that actually ships. 70% cost reduction, 5x latency improvement.
+**Maestro** - RAG infrastructure that actually ships. 70% cost reduction, 5x latency improvement.
 
 ## For Reliability Track: Trust & Safety
 
@@ -66,7 +66,7 @@ Dashboard runs at: http://localhost:3000
 
 ```
 ┌─────────────────────────────────────┐
-│     ScaleRAG Orchestration Layer    │
+│     <Maestro> Orchestration Layer    │
 │  • Semantic Cache (LangCache)       │
 │  • Query Router (Gemini)            │
 │  • Cost Tracking & Budgeting        │

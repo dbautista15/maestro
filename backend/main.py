@@ -8,11 +8,11 @@ from pydantic import BaseModel
 from typing import Optional
 import os
 
-from core.orchestrator import ScaleRAGOrchestrator, OrchestratorConfig
+from core.orchestrator import MaestroOrchestrator, OrchestratorConfig
 
 # Initialize FastAPI
 app = FastAPI(
-    title="ScaleRAG API",
+    title="Maestro API",
     description="Enterprise RAG Orchestration Layer",
     version="1.0.0",
 )
@@ -27,7 +27,7 @@ app.add_middleware(
 )
 
 # Initialize orchestrator (singleton)
-orchestrator = ScaleRAGOrchestrator(
+orchestrator = MaestroOrchestrator(
     config=OrchestratorConfig(
         use_cache=True, cache_threshold=0.88, max_cost_per_query=0.05
     )
@@ -58,7 +58,7 @@ class QueryResponse(BaseModel):
 @app.get("/")
 async def root():
     """Health check endpoint"""
-    return {"service": "ScaleRAG", "status": "operational", "version": "1.0.0"}
+    return {"service": "Maestro", "status": "operational", "version": "1.0.0"}
 
 
 @app.post("/api/query", response_model=QueryResponse)
