@@ -302,3 +302,71 @@ class MetricsCollector:
             })
         
         return result
+
+    def get_avg_latency_timeseries(
+        self, bucket_seconds: int = 60, num_buckets: int = 20
+    ) -> List[Dict]:
+        """
+        Get time-series data for cumulative average response time (latency).
+        
+        Calculates cumulative average latency up to each time bucket.
+        Shows overall performance from the start to each point in time.
+        
+        Args:
+            bucket_seconds: Size of each time bucket in seconds (default: 60 = 1 minute)
+            num_buckets: Number of time buckets to return (default: 20)
+            
+        Returns:
+            List of dicts with timestamp and cumulative average latency in milliseconds
+            
+        WHY: Frontend needs time-series data to show performance trends over time.
+        Cumulative average shows overall response time and helps managers understand
+        if the system is getting faster (from cache warming) or if there are
+        performance degradations.
+        """
+        if not self.queries:
+            return []
+        
+        # Get time range
+        now = time.time()
+        earliest_time = now - (bucket_seconds * num_buckets)
+        
+        # Create buckets to track total latency and query count
+        buckets = defaultdict(lambda: {"total_latency": 0.0, "query_count": 0})
+        
+        # Bucket each query by its timestamp
+        for query in self.queries:
+            if query.timestamp >= earliest_time:
+                # Calculate which bucket this query belongs to
+                bucket_index = int((query.timestamp - earliest_time) / bucket_seconds)
+                bucket_time = earliest_time + (bucket_index * bucket_seconds)
+                
+                buckets[bucket_time]["total_latency"] += query.latency_ms
+                buckets[bucket_time]["query_count"] += 1
+        
+        # Build result with cumulative average latencies
+        result = []
+        cumulative_total_latency = 0.0
+        cumulative_query_count = 0
+        
+        for i in range(num_buckets):
+            bucket_time = earliest_time + (i * bucket_seconds)
+            bucket_data = buckets.get(bucket_time, {"total_latency": 0.0, "query_count": 0})
+            
+            # Add this bucket's data to cumulative totals
+            cumulative_total_latency += bucket_data["total_latency"]
+            cumulative_query_count += bucket_data["query_count"]
+            
+            # Calculate cumulative average latency (avoid division by zero)
+            if cumulative_query_count > 0:
+                avg_latency = cumulative_total_latency / cumulative_query_count
+            else:
+                avg_latency = 0.0
+            
+            result.append({
+                "timestamp": int(bucket_time * 1000),  # Convert to milliseconds for JS
+                "avg_latency": avg_latency,  # Cumulative average latency in ms
+                "query_count": cumulative_query_count,  # For context
+            })
+        
+        return result

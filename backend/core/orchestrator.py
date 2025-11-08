@@ -281,3 +281,9 @@ class MaestroOrchestrator:
     ) -> list:
         """Get time-series data for average cost per query"""
         return self.metrics.get_avg_cost_timeseries(bucket_seconds, num_buckets)
+
+    def get_avg_latency_timeseries(
+        self, bucket_seconds: int = 60, num_buckets: int = 20
+    ) -> list:
+        """Get time-series data for average response time (latency)"""
+        return self.metrics.get_avg_latency_timeseries(bucket_seconds, num_buckets)

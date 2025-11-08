@@ -5,7 +5,7 @@ import QueryInput from '@/components/QueryInput';
 import MetricsCards from '@/components/MetricsCards';
 import ResultDisplay from '@/components/ResultDisplay';
 import AuditTrail from '@/components/AuditTrail';
-import { queryAPI, type QueryResponse, type Metrics, type RecentQuery, type QueryTimeSeriesDataPoint, type CacheHitRateTimeSeriesDataPoint, type AvgCostTimeSeriesDataPoint } from '@/lib/api';
+import { queryAPI, type QueryResponse, type Metrics, type RecentQuery, type QueryTimeSeriesDataPoint, type CacheHitRateTimeSeriesDataPoint, type AvgCostTimeSeriesDataPoint, type AvgLatencyTimeSeriesDataPoint } from '@/lib/api';
 import { AlertCircle } from 'lucide-react';
 
 export default function Dashboard() {
@@ -17,6 +17,7 @@ export default function Dashboard() {
   const [queryTimeSeries, setQueryTimeSeries] = useState<QueryTimeSeriesDataPoint[]>([]);
   const [cacheHitRateTimeSeries, setCacheHitRateTimeSeries] = useState<CacheHitRateTimeSeriesDataPoint[]>([]);
   const [avgCostTimeSeries, setAvgCostTimeSeries] = useState<AvgCostTimeSeriesDataPoint[]>([]);
+  const [avgLatencyTimeSeries, setAvgLatencyTimeSeries] = useState<AvgLatencyTimeSeriesDataPoint[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch metrics on mount and every 5 seconds
@@ -26,6 +27,7 @@ export default function Dashboard() {
     fetchQueryTimeSeries();
     fetchCacheHitRateTimeSeries();
     fetchAvgCostTimeSeries();
+    fetchAvgLatencyTimeSeries();
 
     const interval = setInterval(() => {
       fetchMetrics();
@@ -33,6 +35,7 @@ export default function Dashboard() {
       fetchQueryTimeSeries();
       fetchCacheHitRateTimeSeries();
       fetchAvgCostTimeSeries();
+      fetchAvgLatencyTimeSeries();
     }, 5000); // Update every 5 seconds
 
     return () => clearInterval(interval);
@@ -83,6 +86,15 @@ export default function Dashboard() {
     }
   };
 
+  const fetchAvgLatencyTimeSeries = async () => {
+    try {
+      const data = await queryAPI.getAvgLatencyTimeSeries(60, 20);
+      setAvgLatencyTimeSeries(data);
+    } catch (err) {
+      console.error('Failed to fetch avg latency time series:', err);
+    }
+  };
+
   const handleQuery = async (query: string, strategy?: string) => {
     setLoading(true);
     setError(null);
@@ -101,6 +113,7 @@ export default function Dashboard() {
       await fetchQueryTimeSeries();
       await fetchCacheHitRateTimeSeries();
       await fetchAvgCostTimeSeries();
+      await fetchAvgLatencyTimeSeries();
 
     } catch (err: any) {
       console.error('Query failed:', err);
@@ -167,6 +180,7 @@ export default function Dashboard() {
                   queryTimeSeries={queryTimeSeries}
                   cacheHitRateTimeSeries={cacheHitRateTimeSeries}
                   avgCostTimeSeries={avgCostTimeSeries}
+                  avgLatencyTimeSeries={avgLatencyTimeSeries}
                 />
               )}
             </div>

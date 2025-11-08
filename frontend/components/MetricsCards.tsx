@@ -21,6 +21,12 @@ interface AvgCostTimeSeriesDataPoint {
   queryCount: number;
 }
 
+interface AvgLatencyTimeSeriesDataPoint {
+  timestamp: number;
+  avgLatency: number;
+  queryCount: number;
+}
+
 interface MetricsCardsProps {
   metrics: {
     totalQueries: number;
@@ -33,9 +39,10 @@ interface MetricsCardsProps {
   queryTimeSeries?: QueryTimeSeriesDataPoint[];
   cacheHitRateTimeSeries?: CacheHitRateTimeSeriesDataPoint[];
   avgCostTimeSeries?: AvgCostTimeSeriesDataPoint[];
+  avgLatencyTimeSeries?: AvgLatencyTimeSeriesDataPoint[];
 }
 
-export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRateTimeSeries = [], avgCostTimeSeries = [] }: MetricsCardsProps) {
+export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRateTimeSeries = [], avgCostTimeSeries = [], avgLatencyTimeSeries = [] }: MetricsCardsProps) {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   // Format numbers
@@ -80,33 +87,17 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
     }));
   }, [avgCostTimeSeries]);
 
-  // Generate mock time-series data for Avg Response Time
-  // TODO: Replace with actual backend time-series data
+  // Use real time-series data from backend for average latency
   const avgLatencyData = useMemo(() => {
-    const now = Date.now();
-    const dataPoints = 20;
-    const intervalMs = 60000; // 1 minute intervals
-    
-    return Array.from({ length: dataPoints }, (_, i) => {
-      const timestamp = now - (dataPoints - i - 1) * intervalMs;
-      // Simulate latency improvement over time (as cache warms, more cache hits = lower latency)
-      const initialLatency = metrics.avgLatency * 1.5; // Start higher
-      const finalLatency = metrics.avgLatency;
-      const progress = i / dataPoints;
-      const baseLatency = initialLatency - (initialLatency - finalLatency) * progress;
-      const variance = (Math.random() * 20 - 10); // ±10ms variance
-      const latency = Math.max(0, baseLatency + variance);
-      
-      return {
-        timestamp,
-        latency: Math.round(latency),
-        time: new Date(timestamp).toLocaleTimeString('en-US', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        }),
-      };
-    });
-  }, [metrics.avgLatency]);
+    return avgLatencyTimeSeries.map(point => ({
+      timestamp: point.timestamp,
+      latency: point.avgLatency,
+      time: new Date(point.timestamp).toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }),
+    }));
+  }, [avgLatencyTimeSeries]);
 
   // Generate mock time-series data for Total Saved (cumulative costs)
   // TODO: Replace with actual backend time-series data
@@ -345,7 +336,7 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
           onToggle={toggleCard}
           chart={
             <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-700">Response Time Trend</h3>
+              <h3 className="text-lg font-semibold mb-4 text-gray-700">Cumulative Average Response Time</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={avgLatencyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -368,7 +359,7 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
                       padding: '8px'
                     }}
                     labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
-                    formatter={(value: number) => `${value}ms`}
+                    formatter={(value: number) => `${value.toFixed(1)}ms`}
                   />
                   <Area 
                     type="monotone" 
@@ -382,7 +373,8 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
                 </AreaChart>
               </ResponsiveContainer>
               <p className="text-sm text-gray-600 mt-4">
-                Monitor query response times. Lower latency indicates better performance. Cache hits significantly reduce response time compared to full retrieval.
+                Shows overall average response time from the start of the time window. Lower latency indicates better performance. 
+                Declining values show performance improvements from cache warming and effective routing.
               </p>
             </div>
           }

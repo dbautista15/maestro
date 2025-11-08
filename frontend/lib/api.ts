@@ -77,6 +77,12 @@ export interface AvgCostTimeSeriesDataPoint {
   queryCount: number;
 }
 
+export interface AvgLatencyTimeSeriesDataPoint {
+  timestamp: number;
+  avgLatency: number;
+  queryCount: number;
+}
+
 export const queryAPI = {
   /**
    * Submit a query to the orchestrator
@@ -217,6 +223,20 @@ export const queryAPI = {
     return data.map((point: any) => ({
       timestamp: point.timestamp,
       avgCost: point.avg_cost ?? point.avgCost,
+      queryCount: point.query_count ?? point.queryCount,
+    }));
+  },
+
+  /**
+   * Get time-series data for average response time (latency)
+   */
+  async getAvgLatencyTimeSeries(bucketSeconds: number = 60, numBuckets: number = 20): Promise<AvgLatencyTimeSeriesDataPoint[]> {
+    const response = await api.get(`/api/metrics/timeseries/avg-latency?bucket_seconds=${bucketSeconds}&num_buckets=${numBuckets}`);
+    const data = response.data.data;
+
+    return data.map((point: any) => ({
+      timestamp: point.timestamp,
+      avgLatency: point.avg_latency ?? point.avgLatency,
       queryCount: point.query_count ?? point.queryCount,
     }));
   },

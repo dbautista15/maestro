@@ -178,6 +178,28 @@ async def get_avg_cost_timeseries(bucket_seconds: int = 60, num_buckets: int = 2
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/api/metrics/timeseries/avg-latency")
+async def get_avg_latency_timeseries(bucket_seconds: int = 60, num_buckets: int = 20):
+    """
+    Get time-series data for cumulative average response time (latency).
+    
+    Returns cumulative average latency up to each time point.
+    
+    Args:
+        bucket_seconds: Size of each time bucket in seconds (default: 60 = 1 minute)
+        num_buckets: Number of time buckets to return (default: 20)
+        
+    WHY: Frontend needs time-series data to visualize performance trends.
+    Cumulative average shows overall response time and helps managers understand
+    if the system is getting faster over time through cache warming, or if there
+    are performance degradations.
+    """
+    try:
+        return {"data": orchestrator.get_avg_latency_timeseries(bucket_seconds, num_buckets)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/health")
 @app.head("/api/health")
 async def health_check():
