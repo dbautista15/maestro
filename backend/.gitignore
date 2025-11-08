@@ -1,0 +1,18 @@
+# Virtual environment
+venv/
+env/
+
+# Environment variables
+.env
+
+# Data files (embeddings are large, regenerate locally)
+data/*.npy
+data/*.pkl
+
+# But keep JSON documents (small, needed for setup)
+!data/*.json
+!data/metadata.json
+
+# Python cache
+__pycache__/
+*.pyc
