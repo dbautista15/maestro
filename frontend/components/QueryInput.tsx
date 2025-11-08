@@ -20,6 +20,8 @@ export default function QueryInput({ onSubmit, loading }: QueryInputProps) {
       query, 
       strategy === 'auto' ? undefined : strategy
     );
+
+    setQuery('');
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
