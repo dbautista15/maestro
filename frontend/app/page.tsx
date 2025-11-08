@@ -1,65 +1,141 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState, useEffect } from 'react';
+import QueryInput from '@/components/QueryInput';
+import MetricsCards from '@/components/MetricsCards';
+import ResultDisplay from '@/components/ResultDisplay';
+import ViewToggle from '@/components/ViewToggle';
+import AuditTrail from '@/components/AuditTrail';
+import { queryAPI, type QueryResponse, type Metrics, type RecentQuery } from '@/lib/api';
+import { AlertCircle } from 'lucide-react';
+
+export default function Dashboard() {
+  // State
+  const [view, setView] = useState<'performance' | 'reliability'>('performance');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<QueryResponse | null>(null);
+  const [metrics, setMetrics] = useState<Metrics | null>(null);
+  const [recentQueries, setRecentQueries] = useState<RecentQuery[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch metrics on mount and every 5 seconds
+  useEffect(() => {
+    fetchMetrics();
+    fetchRecentQueries();
+
+    const interval = setInterval(() => {
+      fetchMetrics();
+      fetchRecentQueries();
+    }, 5000); // Update every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchMetrics = async () => {
+    try {
+      const data = await queryAPI.getMetrics();
+      setMetrics(data);
+    } catch (err) {
+      console.error('Failed to fetch metrics:', err);
+    }
+  };
+
+  const fetchRecentQueries = async () => {
+    try {
+      const data = await queryAPI.getRecentQueries(10);
+      setRecentQueries(data);
+    } catch (err) {
+      console.error('Failed to fetch recent queries:', err);
+    }
+  };
+
+  const handleQuery = async (query: string, strategy?: string) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await queryAPI.process({
+        query,
+        strategy: strategy as any,
+      });
+
+      setResult(response);
+      
+      // Refresh metrics and audit trail
+      await fetchMetrics();
+      await fetchRecentQueries();
+
+    } catch (err: any) {
+      console.error('Query failed:', err);
+      setError(err.response?.data?.detail || err.message || 'Query failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                {view === 'performance' ? 'Maestro' : 'Orchestra'}
+              </h1>
+              <p className="text-gray-600 mt-1">
+                {view === 'performance' 
+                  ? 'Enterprise RAG Infrastructure That Ships'
+                  : 'Production-Grade Reliability Framework'
+                }
+              </p>
+            </div>
+            <ViewToggle currentView={view} onToggle={setView} />
+          </div>
+        </div>
+      </header>
+
+      {/* Main content */}
+      <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        {/* Metrics cards */}
+        {metrics && (
+          <MetricsCards metrics={metrics} view={view} />
+        )}
+
+        {/* Query input */}
+        <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+          <QueryInput onSubmit={handleQuery} loading={loading} />
+        </div>
+
+        {/* Error display */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 p-4 rounded-lg flex items-start gap-3">
+            <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
+            <div>
+              <div className="font-medium text-red-900">Query Failed</div>
+              <div className="text-sm text-red-700 mt-1">{error}</div>
+            </div>
+          </div>
+        )}
+
+        {/* Result display */}
+        <ResultDisplay result={result} view={view} />
+
+        {/* Audit trail */}
+        {recentQueries.length > 0 && (
+          <AuditTrail queries={recentQueries} />
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 mt-16">
+        <div className="max-w-7xl mx-auto px-6 py-6 text-center text-sm text-gray-500">
+          <p>
+            Built for {view === 'performance' ? 'Google Track' : 'Reliability Track'} • 
+            Powered by Gemini & Vertex AI
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </footer>
     </div>
   );
 }
