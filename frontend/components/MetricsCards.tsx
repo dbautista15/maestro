@@ -74,6 +74,35 @@ export default function MetricsCards({ metrics }: MetricsCardsProps) {
     });
   }, [metrics.cacheHitRate]);
 
+  // Generate mock time-series data for Avg Cost
+  // TODO: Replace with actual backend time-series data
+  const avgCostData = useMemo(() => {
+    const now = Date.now();
+    const dataPoints = 20;
+    const intervalMs = 60000; // 1 minute intervals
+    const naiveCost = 0.018; // Naive RAG cost baseline
+    
+    return Array.from({ length: dataPoints }, (_, i) => {
+      const timestamp = now - (dataPoints - i - 1) * intervalMs;
+      // Simulate cost optimization over time (decreasing as cache warms)
+      const initialCost = naiveCost * 0.9; // Start at 90% of naive
+      const finalCost = metrics.avgCost;
+      const progress = i / dataPoints;
+      const baseCost = initialCost - (initialCost - finalCost) * progress;
+      const variance = (Math.random() * 0.002 - 0.001); // Small variance
+      const cost = Math.max(0, baseCost + variance);
+      
+      return {
+        timestamp,
+        cost: cost,
+        time: new Date(timestamp).toLocaleTimeString('en-US', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+      };
+    });
+  }, [metrics.avgCost]);
+
   const toggleCard = (cardId: string) => {
     setExpandedCard(expandedCard === cardId ? null : cardId);
   };
@@ -192,15 +221,74 @@ export default function MetricsCards({ metrics }: MetricsCardsProps) {
         />
       </div>
 
-      {/* Avg Cost */}
-      <MetricCard
-        title="Avg Cost/Query"
-        value={formatCost(metrics.avgCost ?? 0)}
-        subtitle="vs $0.018 naive"
-        icon={<DollarSign size={24} />}
-        color="blue"
-        trend={metrics.avgCost < 0.010 ? 'down' : undefined}
-      />
+      {/* Avg Cost - Expandable */}
+      <div className={`${expandedCard === 'avg-cost' ? 'md:col-span-2 lg:col-span-3' : ''}`}>
+        <ExpandableMetricCard
+          id="avg-cost"
+          title="Avg Cost/Query"
+          value={formatCost(metrics.avgCost ?? 0)}
+          subtitle="vs $0.018 naive"
+          icon={<DollarSign size={24} />}
+          color="blue"
+          trend={metrics.avgCost < 0.010 ? 'down' : undefined}
+          isExpanded={expandedCard === 'avg-cost'}
+          onToggle={toggleCard}
+          chart={
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-gray-700">Average Cost per Query Over Time</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={avgCostData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis 
+                    dataKey="time" 
+                    tick={{ fontSize: 12 }}
+                    stroke="#6b7280"
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12 }}
+                    stroke="#6b7280"
+                    tickFormatter={(val) => `$${val.toFixed(4)}`}
+                    label={{ value: 'Cost ($)', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#fff', 
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      padding: '8px'
+                    }}
+                    labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
+                    formatter={(value: number) => `$${value.toFixed(4)}`}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="cost" 
+                    stroke="#3b82f6" 
+                    strokeWidth={2}
+                    dot={{ fill: '#3b82f6', r: 3 }}
+                    activeDot={{ r: 5 }}
+                    name="Avg Cost"
+                  />
+                  {/* Reference line for naive cost */}
+                  <Line 
+                    type="monotone" 
+                    dataKey={() => 0.018} 
+                    stroke="#ef4444" 
+                    strokeWidth={1}
+                    strokeDasharray="5 5"
+                    dot={false}
+                    name="Naive RAG Cost"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+              <p className="text-sm text-gray-600 mt-4">
+                Track cost optimization over time. The dashed red line shows the baseline naive RAG cost ($0.018). 
+                Lower values indicate better cost efficiency through caching and smart routing.
+              </p>
+            </div>
+          }
+        />
+      </div>
 
       {/* Total Saved */}
       <MetricCard
