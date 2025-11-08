@@ -2,17 +2,19 @@
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 
+
 # Caching
 langcache==0.10.0
 
 # Google AI
 google-generativeai==0.3.1
 
+
 # Embeddings
-sentence-transformers==2.2.2
+sentence-transformers
 
 # Data Processing
-numpy==1.24.3
+numpy
 scipy==1.11.3
 
 # Environment & Config
