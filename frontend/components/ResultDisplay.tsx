@@ -24,47 +24,32 @@ export default function ResultDisplay({ result }: ResultDisplayProps) {
     : 'text-red-600';
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
-      {/* Header with badges */}
-      <div className="flex flex-wrap items-center gap-3">
-        {/* Source badge */}
-        <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-          isCache ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-        }`}>
-          {result.source}
-          {isCache && result.hitCount && ` (${result.hitCount} hits)`}
+    <div className="w-full max-w-4xl mx-auto space-y-2">
+      {/* Response */}
+      <div className="bg-white p-4 rounded-lg space-y-4 shadow-sm border border-gray-200">
+        {/* Header with badges */}
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Source badge */}
+          <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+            isCache ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+          }`}>
+            {result.source}
+            {isCache && result.hitCount && ` (${result.hitCount} hits)`}
+          </div>
+
+          {/* Strategy badge */}
+          <div className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+            {result.strategy}
+          </div>
+
+          {/* Confidence badge */}
+          <div className={`px-3 py-1 rounded-full text-xs font-medium bg-gray-100 ${confidenceColor}`}>
+            {(result.confidence * 100).toFixed(0)}% confidence
+          </div>
         </div>
 
-        {/* Strategy badge */}
-        <div className="px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-          {result.strategy}
-        </div>
-
-        {/* Confidence badge */}
-        <div className={`px-3 py-1 rounded-full text-sm font-medium bg-gray-100 ${confidenceColor}`}>
-          {(result.confidence * 100).toFixed(0)}% confidence
-        </div>
-      </div>
-
-      {/* Metrics row */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="flex items-center gap-2 text-sm">
-          <Clock size={16} className="text-gray-400" />
-          <span className="font-medium">{Math.round(result.latency)}ms</span>
-        </div>
-        <div className="flex items-center gap-2 text-sm">
-          <DollarSign size={16} className="text-gray-400" />
-          <span className="font-medium">${result.cost.toFixed(4)}</span>
-        </div>
-        <div className="flex items-center gap-2 text-sm">
-          <FileText size={16} className="text-gray-400" />
-          <span className="font-medium">{result.documents.length} docs</span>
-        </div>
-      </div>
-
-      {/* Answer */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+        {/* Answer */}
+        <h3 className="text-md font-semibold mb-1 flex items-center gap-2">
           {result.confidence > 0.9 ? (
             <CheckCircle className="text-green-600" size={20} />
           ) : (
@@ -72,7 +57,23 @@ export default function ResultDisplay({ result }: ResultDisplayProps) {
           )}
           Response
         </h3>
-        <p className="text-gray-700 leading-relaxed">{result.answer}</p>
+        <p className="text-sm text-gray-700 leading-relaxed">{result.answer}</p>
+
+        {/* Metrics row */}
+        <div className="grid grid-cols-3 gap-0">
+          <div className="flex items-center gap-1 text-xs">
+            <Clock size={14} className="text-gray-400" />
+            <span className="font-medium">{Math.round(result.latency)}ms</span>
+          </div>
+          <div className="flex items-center gap-1 text-xs">
+            <DollarSign size={14} className="text-gray-400" />
+            <span className="font-medium">{result.cost.toFixed(4)}</span>
+          </div>
+          <div className="flex items-center gap-1 text-xs">
+            <FileText size={14} className="text-gray-400" />
+            <span className="font-medium">{result.documents.length} docs</span>
+          </div>
+        </div>
       </div>
 
       {/* Documents */}
