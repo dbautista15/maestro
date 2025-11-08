@@ -318,16 +318,6 @@ export default function MetricsCards({ metrics }: MetricsCardsProps) {
         />
       </div>
 
-      {/* Total Saved */}
-      <MetricCard
-        title="Total Saved"
-        value={formatCost(metrics.costSaved ?? 0)}
-        subtitle={`${((metrics.costSaved / (metrics.totalCost + metrics.costSaved)) * 100).toFixed(0)}% reduction`}
-        icon={<TrendingDown size={24} />}
-        color="purple"
-        trend="down"
-      />
-
       {/* Avg Response Time - Expandable */}
       <div className={`${expandedCard === 'avg-latency' ? 'md:col-span-2 lg:col-span-3' : ''}`}>
         <ExpandableMetricCard
@@ -385,13 +375,14 @@ export default function MetricsCards({ metrics }: MetricsCardsProps) {
         />
       </div>
 
-      {/* Audit Coverage */}
+      {/* Total Saved */}
       <MetricCard
-        title="Audit Coverage"
-        value="100%"
-        subtitle="Full provenance tracking"
-        icon={<Target size={24} />}
-        color="green"
+        title="Total Saved"
+        value={formatCost(metrics.costSaved ?? 0)}
+        subtitle={`${((metrics.costSaved / (metrics.totalCost + metrics.costSaved)) * 100).toFixed(0)}% reduction`}
+        icon={<TrendingDown size={24} />}
+        color="purple"
+        trend="down"
       />
     </div>
   );
