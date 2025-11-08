@@ -49,7 +49,7 @@ export default function Dashboard() {
 
   const fetchRecentQueries = async () => {
     try {
-      const data = await queryAPI.getRecentQueries(5);
+      const data = await queryAPI.getRecentQueries(3);
       setRecentQueries(data);
     } catch (err) {
       console.error('Failed to fetch recent queries:', err);
@@ -133,9 +133,6 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 min-h-full min-w-full">
           {/* Left Column - Interactions */}
           <div className="lg:col-span-1 space-y-2 flex flex-col h-full">
-            {/* Result display */}
-            <ResultDisplay result={result} />
-
             {/* Query input */}
             <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
               <QueryInput onSubmit={handleQuery} loading={loading} />
@@ -156,6 +153,9 @@ export default function Dashboard() {
             {recentQueries.length > 0 && (
               <AuditTrail queries={recentQueries} />
             )}
+
+            {/* Result display */}
+            <ResultDisplay result={result} />
           </div>
 
           {/* Right Column - Metrics */}
