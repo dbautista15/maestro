@@ -6,6 +6,7 @@ import MetricsCards from '@/components/MetricsCards';
 import ResultDisplay from '@/components/ResultDisplay';
 import AuditTrail from '@/components/AuditTrail';
 import AdversarialTester from '@/components/AdversarialTester';
+import PerformanceRadar from '@/components/PerformanceRadar';
 import { queryAPI, type QueryResponse, type Metrics, type RecentQuery, type QueryTimeSeriesDataPoint, type CacheHitRateTimeSeriesDataPoint, type AvgCostTimeSeriesDataPoint, type AvgLatencyTimeSeriesDataPoint, type CumulativeCostTimeSeriesDataPoint, type ConfidenceTimeSeriesDataPoint } from '@/lib/api';
 import { AlertCircle } from 'lucide-react';
 
@@ -201,6 +202,18 @@ export default function Dashboard() {
           {/* Right Column - Metrics */}
           <div className="lg:col-span-2 h-full">
             <div className="lg:sticky lg:top-8 space-y-4">
+              {/* Performance Radar Chart */}
+              {metrics && (
+                <PerformanceRadar
+                  metrics={{
+                    avgLatency: metrics.avgLatency,
+                    avgCost: metrics.avgCost,
+                    avgConfidence: metrics.avgConfidence,
+                  }}
+                />
+              )}
+
+              {/* Expandable Metric Cards */}
               {metrics && (
                 <MetricsCards
                   metrics={metrics}
