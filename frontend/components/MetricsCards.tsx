@@ -131,6 +131,42 @@ export default function MetricsCards({ metrics }: MetricsCardsProps) {
     });
   }, [metrics.avgLatency]);
 
+  // Generate mock time-series data for Total Saved (cumulative costs)
+  // TODO: Replace with actual backend time-series data
+  const cumulativeCostData = useMemo(() => {
+    const now = Date.now();
+    const dataPoints = 20;
+    const intervalMs = 60000; // 1 minute intervals
+    const naiveCostPerQuery = 0.018; // Naive RAG cost per query
+    
+    let cumulativeActual = 0;
+    let cumulativeNaive = 0;
+    
+    return Array.from({ length: dataPoints }, (_, i) => {
+      const timestamp = now - (dataPoints - i - 1) * intervalMs;
+      // Simulate queries happening over time
+      const queriesAtThisPoint = Math.floor((metrics.totalQueries * (i + 1)) / dataPoints);
+      
+      // Calculate cumulative costs
+      // Naive cost: all queries at full cost
+      cumulativeNaive = queriesAtThisPoint * naiveCostPerQuery;
+      
+      // Actual cost: proportional to current total cost
+      cumulativeActual = (metrics.totalCost * (i + 1)) / dataPoints;
+      
+      return {
+        timestamp,
+        naiveCost: cumulativeNaive,
+        actualCost: cumulativeActual,
+        saved: cumulativeNaive - cumulativeActual,
+        time: new Date(timestamp).toLocaleTimeString('en-US', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+      };
+    });
+  }, [metrics.totalQueries, metrics.totalCost]);
+
   const toggleCard = (cardId: string) => {
     setExpandedCard(expandedCard === cardId ? null : cardId);
   };
@@ -375,15 +411,75 @@ export default function MetricsCards({ metrics }: MetricsCardsProps) {
         />
       </div>
 
-      {/* Total Saved */}
-      <MetricCard
-        title="Total Saved"
-        value={formatCost(metrics.costSaved ?? 0)}
-        subtitle={`${((metrics.costSaved / (metrics.totalCost + metrics.costSaved)) * 100).toFixed(0)}% reduction`}
-        icon={<TrendingDown size={24} />}
-        color="purple"
-        trend="down"
-      />
+      {/* Total Saved - Expandable */}
+      <div className={`${expandedCard === 'total-saved' ? 'md:col-span-2 lg:col-span-3' : ''}`}>
+        <ExpandableMetricCard
+          id="total-saved"
+          title="Total Saved"
+          value={formatCost(metrics.costSaved ?? 0)}
+          subtitle={`${((metrics.costSaved / (metrics.totalCost + metrics.costSaved)) * 100).toFixed(0)}% reduction`}
+          icon={<TrendingDown size={24} />}
+          color="purple"
+          trend="down"
+          isExpanded={expandedCard === 'total-saved'}
+          onToggle={toggleCard}
+          chart={
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-gray-700">Cumulative Cost Comparison</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={cumulativeCostData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis 
+                    dataKey="time" 
+                    tick={{ fontSize: 12 }}
+                    stroke="#6b7280"
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12 }}
+                    stroke="#6b7280"
+                    tickFormatter={(val) => `$${val.toFixed(3)}`}
+                    label={{ value: 'Cumulative Cost ($)', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#fff', 
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      padding: '8px'
+                    }}
+                    labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
+                    formatter={(value: number) => `$${value.toFixed(4)}`}
+                  />
+                  {/* Naive cost line (what it would have cost) */}
+                  <Area 
+                    type="monotone" 
+                    dataKey="naiveCost" 
+                    stroke="#ef4444" 
+                    fill="#ef4444" 
+                    fillOpacity={0.3}
+                    strokeWidth={2}
+                    name="Naive RAG Cost"
+                  />
+                  {/* Actual cost line */}
+                  <Area 
+                    type="monotone" 
+                    dataKey="actualCost" 
+                    stroke="#a855f7" 
+                    fill="#a855f7" 
+                    fillOpacity={0.6}
+                    strokeWidth={2}
+                    name="Actual Cost"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+              <p className="text-sm text-gray-600 mt-4">
+                The gap between the red line (naive full retrieval cost) and purple line (actual cost with optimization) represents total savings. 
+                Larger gap = more cost efficiency through caching and smart routing.
+              </p>
+            </div>
+          }
+        />
+      </div>
     </div>
   );
 }
