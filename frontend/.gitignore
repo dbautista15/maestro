@@ -40,3 +40,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# python (not used in frontend, but ignore if accidentally created)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python

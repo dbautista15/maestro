@@ -166,6 +166,18 @@ Respond with ONLY ONE WORD: simple, moderate, or complex"""
         if any(keyword in query_lower for keyword in complex_keywords):
             return "complex"
 
+        # Moderate indicators (check before word count)
+        moderate_keywords = [
+            "how do",
+            "how can",
+            "explain",
+            "tell me about",
+            "describe",
+            "what features",
+        ]
+        if any(keyword in query_lower for keyword in moderate_keywords):
+            return "moderate"
+
         # Simple indicators
         if len(words) <= 5:
             return "simple"

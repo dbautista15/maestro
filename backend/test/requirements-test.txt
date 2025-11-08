@@ -1,0 +1,19 @@
+# Testing dependencies
+pytest
+pytest-cov
+pytest-asyncio
+pytest-mock
+
+# Core dependencies (same as backend)
+fastapi
+uvicorn
+pydantic
+python-dotenv
+google-generativeai
+sentence-transformers
+numpy
+requests
+
+# Additional testing utilities
+pytest-timeout
+pytest-xdist # For parallel test execution

@@ -108,8 +108,8 @@ class MaestroOrchestrator:
         # STEP 4: Check budget constraint
         if strategy.estimated_cost > config.max_cost_per_query:
             # Downgrade to cheaper strategy
-            print(f" Cost constraint: downgrading to balanced")
-            strategy = self.router.select_strategy("moderate")
+            print(f" Cost constraint: downgrading to fast")
+            strategy = self.router.select_strategy("simple")
 
         # STEP 5: Retrieve documents
         try:
@@ -153,7 +153,7 @@ class MaestroOrchestrator:
         }
 
         # STEP 10: Cache result (if high confidence)
-        if config.use_cache and confidence > 0.85:
+        if config.use_cache and confidence >= 0.85:
             self.cache.set(
                 query=query,
                 answer=answer,
@@ -200,18 +200,31 @@ class MaestroOrchestrator:
         Calculate confidence score from documents.
 
         WHY: Gives enterprises a signal for when to escalate to humans.
+
+        NOTE: Semantic similarity scores from embeddings typically range 0.3-0.7
+        for good matches. We scale these to more intuitive 0-1 confidence scores.
         """
         if not documents:
             return 0.0
 
-        # Use average similarity score
+        # Use top document's similarity score (most relevant)
         scores = [d["similarity_score"] for d in documents]
-        if len(scores) == 1:
-            return min(scores[0] * 1.2, 1.0)
-        avg_score = sum(scores) / len(scores)
+        top_score = scores[0]  # Documents are sorted by similarity
 
-        # Convert to confidence (higher similarity = higher confidence)
-        return min(avg_score * 1.1, 1.0)  # Cap at 1.0
+        # Scale similarity to confidence
+        # 0.2 similarity → ~0.68 confidence (low)
+        # 0.3 similarity → ~0.85 confidence (moderate)
+        # 0.4 similarity → ~1.0 confidence (high)
+        # 0.5+ similarity → 1.0 confidence (very high)
+        confidence = min((top_score + 0.15) * 2.0, 1.0)
+
+        # Boost confidence if multiple documents agree (avg similarity is also high)
+        if len(scores) > 1:
+            avg_score = sum(scores[:3]) / min(3, len(scores))  # Top 3 docs
+            if avg_score > 0.35:
+                confidence = min(confidence * 1.05, 1.0)  # 5% boost
+
+        return confidence
 
     def _serialize_doc(self, doc: Dict) -> Dict:
         """Prepare document for JSON response"""
