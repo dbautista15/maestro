@@ -86,35 +86,44 @@ export default function Dashboard() {
       </header>
 
       {/* Main content */}
-      <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-        {/* Metrics cards */}
-        {metrics && (
-          <MetricsCards metrics={metrics} />
-        )}
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Interactions */}
+          <div className="lg:col-span-1 space-y-8">
+            {/* Query input */}
+            <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+              <QueryInput onSubmit={handleQuery} loading={loading} />
+            </div>
 
-        {/* Query input */}
-        <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
-          <QueryInput onSubmit={handleQuery} loading={loading} />
-        </div>
+            {/* Error display */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 p-4 rounded-lg flex items-start gap-3">
+                <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
+                <div>
+                  <div className="font-medium text-red-900">Query Failed</div>
+                  <div className="text-sm text-red-700 mt-1">{error}</div>
+                </div>
+              </div>
+            )}
 
-        {/* Error display */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 p-4 rounded-lg flex items-start gap-3">
-            <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
-            <div>
-              <div className="font-medium text-red-900">Query Failed</div>
-              <div className="text-sm text-red-700 mt-1">{error}</div>
+            {/* Result display */}
+            <ResultDisplay result={result} />
+
+            {/* Audit trail */}
+            {recentQueries.length > 0 && (
+              <AuditTrail queries={recentQueries} />
+            )}
+          </div>
+
+          {/* Right Column - Metrics */}
+          <div className="lg:col-span-2">
+            <div className="lg:sticky lg:top-8">
+              {metrics && (
+                <MetricsCards metrics={metrics} />
+              )}
             </div>
           </div>
-        )}
-
-        {/* Result display */}
-        <ResultDisplay result={result} />
-
-        {/* Audit trail */}
-        {recentQueries.length > 0 && (
-          <AuditTrail queries={recentQueries} />
-        )}
+        </div>
       </main>
 
       {/* Footer */}
