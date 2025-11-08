@@ -3,7 +3,7 @@ fastapi==0.104.1
 uvicorn[standard]==0.24.0
 
 # Caching
-langcache==0.1.0
+langcache==0.10.0
 
 # Google AI
 google-generativeai==0.3.1
