@@ -85,8 +85,8 @@ Dashboard runs at: http://localhost:3000
 
 ## Team
 
-- **Backend Engineer:** [Your Name] - Orchestration engine, caching, routing
-- **Frontend Engineer:** [Teammate Name] - Dashboard, visualizations, UX
+- **Backend Engineer:** David Bautista - Orchestration engine, caching, routing
+- **Frontend Engineer:** Bao Dinh - Dashboard, visualizations, UX
 
 ---
 
@@ -112,7 +112,3 @@ Dashboard runs at: http://localhost:3000
 - Recharts (visualizations)
 
 ---
-
-## License
-
-MIT
