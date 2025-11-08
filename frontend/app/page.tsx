@@ -5,7 +5,7 @@ import QueryInput from '@/components/QueryInput';
 import MetricsCards from '@/components/MetricsCards';
 import ResultDisplay from '@/components/ResultDisplay';
 import AuditTrail from '@/components/AuditTrail';
-import { queryAPI, type QueryResponse, type Metrics, type RecentQuery, type QueryTimeSeriesDataPoint } from '@/lib/api';
+import { queryAPI, type QueryResponse, type Metrics, type RecentQuery, type QueryTimeSeriesDataPoint, type CacheHitRateTimeSeriesDataPoint } from '@/lib/api';
 import { AlertCircle } from 'lucide-react';
 
 export default function Dashboard() {
@@ -15,6 +15,7 @@ export default function Dashboard() {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [recentQueries, setRecentQueries] = useState<RecentQuery[]>([]);
   const [queryTimeSeries, setQueryTimeSeries] = useState<QueryTimeSeriesDataPoint[]>([]);
+  const [cacheHitRateTimeSeries, setCacheHitRateTimeSeries] = useState<CacheHitRateTimeSeriesDataPoint[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch metrics on mount and every 5 seconds
@@ -22,11 +23,13 @@ export default function Dashboard() {
     fetchMetrics();
     fetchRecentQueries();
     fetchQueryTimeSeries();
+    fetchCacheHitRateTimeSeries();
 
     const interval = setInterval(() => {
       fetchMetrics();
       fetchRecentQueries();
       fetchQueryTimeSeries();
+      fetchCacheHitRateTimeSeries();
     }, 5000); // Update every 5 seconds
 
     return () => clearInterval(interval);
@@ -59,6 +62,15 @@ export default function Dashboard() {
     }
   };
 
+  const fetchCacheHitRateTimeSeries = async () => {
+    try {
+      const data = await queryAPI.getCacheHitRateTimeSeries(60, 20);
+      setCacheHitRateTimeSeries(data);
+    } catch (err) {
+      console.error('Failed to fetch cache hit rate time series:', err);
+    }
+  };
+
   const handleQuery = async (query: string, strategy?: string) => {
     setLoading(true);
     setError(null);
@@ -75,6 +87,7 @@ export default function Dashboard() {
       await fetchMetrics();
       await fetchRecentQueries();
       await fetchQueryTimeSeries();
+      await fetchCacheHitRateTimeSeries();
 
     } catch (err: any) {
       console.error('Query failed:', err);
@@ -136,7 +149,11 @@ export default function Dashboard() {
           <div className="lg:col-span-2 h-full">
             <div className="lg:sticky lg:top-8">
               {metrics && (
-                <MetricsCards metrics={metrics} queryTimeSeries={queryTimeSeries} />
+                <MetricsCards 
+                  metrics={metrics} 
+                  queryTimeSeries={queryTimeSeries}
+                  cacheHitRateTimeSeries={cacheHitRateTimeSeries}
+                />
               )}
             </div>
           </div>

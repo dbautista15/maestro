@@ -9,6 +9,12 @@ interface QueryTimeSeriesDataPoint {
   queries: number;
 }
 
+interface CacheHitRateTimeSeriesDataPoint {
+  timestamp: number;
+  hitRate: number;
+  totalQueries: number;
+}
+
 interface MetricsCardsProps {
   metrics: {
     totalQueries: number;
@@ -19,9 +25,10 @@ interface MetricsCardsProps {
     avgLatency: number;
   };
   queryTimeSeries?: QueryTimeSeriesDataPoint[];
+  cacheHitRateTimeSeries?: CacheHitRateTimeSeriesDataPoint[];
 }
 
-export default function MetricsCards({ metrics, queryTimeSeries = [] }: MetricsCardsProps) {
+export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRateTimeSeries = [] }: MetricsCardsProps) {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   // Format numbers
@@ -41,31 +48,18 @@ export default function MetricsCards({ metrics, queryTimeSeries = [] }: MetricsC
     }));
   }, [queryTimeSeries]);
 
-  // Generate mock time-series data for Cache Hit Rate
-  // TODO: Replace with actual backend time-series data
+  // Use real time-series data from backend for cache hit rate
   const cacheHitRateData = useMemo(() => {
-    const now = Date.now();
-    const dataPoints = 20;
-    const intervalMs = 60000; // 1 minute intervals
-    
-    return Array.from({ length: dataPoints }, (_, i) => {
-      const timestamp = now - (dataPoints - i - 1) * intervalMs;
-      // Simulate cache warming up over time
-      const baseRate = Math.min(metrics.cacheHitRate, (i / dataPoints) * metrics.cacheHitRate * 1.2);
-      const variance = (Math.random() * 0.1 - 0.05); // -5% to +5%
-      const hitRate = Math.max(0, Math.min(1, baseRate + variance));
-      
-      return {
-        timestamp,
-        hitRate: hitRate,
-        hitRatePercent: hitRate * 100,
-        time: new Date(timestamp).toLocaleTimeString('en-US', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        }),
-      };
-    });
-  }, [metrics.cacheHitRate]);
+    return cacheHitRateTimeSeries.map(point => ({
+      timestamp: point.timestamp,
+      hitRate: point.hitRate,
+      hitRatePercent: point.hitRate * 100,
+      time: new Date(point.timestamp).toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }),
+    }));
+  }, [cacheHitRateTimeSeries]);
 
   // Generate mock time-series data for Avg Cost
   // TODO: Replace with actual backend time-series data

@@ -269,3 +269,9 @@ class MaestroOrchestrator:
     ) -> list:
         """Get time-series data for query volume"""
         return self.metrics.get_query_timeseries(bucket_seconds, num_buckets)
+
+    def get_cache_hit_rate_timeseries(
+        self, bucket_seconds: int = 60, num_buckets: int = 20
+    ) -> list:
+        """Get time-series data for cache hit rate"""
+        return self.metrics.get_cache_hit_rate_timeseries(bucket_seconds, num_buckets)

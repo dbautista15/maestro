@@ -166,3 +166,64 @@ class MetricsCollector:
             })
         
         return result
+
+    def get_cache_hit_rate_timeseries(
+        self, bucket_seconds: int = 60, num_buckets: int = 20
+    ) -> List[Dict]:
+        """
+        Get time-series data for cache hit rate.
+        
+        Calculates cache hit rate per time bucket for trend visualization.
+        
+        Args:
+            bucket_seconds: Size of each time bucket in seconds (default: 60 = 1 minute)
+            num_buckets: Number of time buckets to return (default: 20)
+            
+        Returns:
+            List of dicts with timestamp and cache hit rate (0.0 to 1.0)
+            
+        WHY: Frontend needs time-series data to show cache warming patterns
+        and effectiveness over time. This helps managers understand if the
+        cache is improving query performance.
+        """
+        if not self.queries:
+            return []
+        
+        # Get time range
+        now = time.time()
+        earliest_time = now - (bucket_seconds * num_buckets)
+        
+        # Create buckets to track total and cache hits
+        buckets = defaultdict(lambda: {"total": 0, "cache_hits": 0})
+        
+        # Bucket each query by its timestamp
+        for query in self.queries:
+            if query.timestamp >= earliest_time:
+                # Calculate which bucket this query belongs to
+                bucket_index = int((query.timestamp - earliest_time) / bucket_seconds)
+                bucket_time = earliest_time + (bucket_index * bucket_seconds)
+                
+                buckets[bucket_time]["total"] += 1
+                if query.source == "cache":
+                    buckets[bucket_time]["cache_hits"] += 1
+        
+        # Build result with cache hit rates per bucket
+        result = []
+        
+        for i in range(num_buckets):
+            bucket_time = earliest_time + (i * bucket_seconds)
+            bucket_data = buckets.get(bucket_time, {"total": 0, "cache_hits": 0})
+            
+            # Calculate hit rate for this bucket (avoid division by zero)
+            if bucket_data["total"] > 0:
+                hit_rate = bucket_data["cache_hits"] / bucket_data["total"]
+            else:
+                hit_rate = 0.0
+            
+            result.append({
+                "timestamp": int(bucket_time * 1000),  # Convert to milliseconds for JS
+                "hit_rate": hit_rate,  # Cache hit rate (0.0 to 1.0)
+                "total_queries": bucket_data["total"],  # For context
+            })
+        
+        return result
