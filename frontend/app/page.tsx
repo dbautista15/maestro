@@ -81,7 +81,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                {view === 'performance' ? 'Maestro' : 'Orchestra'}
+                {view === 'performance' ? 'Maestro' : 'Maestro'}
               </h1>
               <p className="text-gray-600 mt-1">
                 {view === 'performance' 
