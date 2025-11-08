@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { TrendingDown, TrendingUp, DollarSign, Zap, Database, Clock, Target, ChevronDown, ChevronUp } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface MetricsCardsProps {
   metrics: {
@@ -47,6 +47,32 @@ export default function MetricsCards({ metrics }: MetricsCardsProps) {
       };
     });
   }, [metrics.totalQueries]);
+
+  // Generate mock time-series data for Cache Hit Rate
+  // TODO: Replace with actual backend time-series data
+  const cacheHitRateData = useMemo(() => {
+    const now = Date.now();
+    const dataPoints = 20;
+    const intervalMs = 60000; // 1 minute intervals
+    
+    return Array.from({ length: dataPoints }, (_, i) => {
+      const timestamp = now - (dataPoints - i - 1) * intervalMs;
+      // Simulate cache warming up over time
+      const baseRate = Math.min(metrics.cacheHitRate, (i / dataPoints) * metrics.cacheHitRate * 1.2);
+      const variance = (Math.random() * 0.1 - 0.05); // -5% to +5%
+      const hitRate = Math.max(0, Math.min(1, baseRate + variance));
+      
+      return {
+        timestamp,
+        hitRate: hitRate,
+        hitRatePercent: hitRate * 100,
+        time: new Date(timestamp).toLocaleTimeString('en-US', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+      };
+    });
+  }, [metrics.cacheHitRate]);
 
   const toggleCard = (cardId: string) => {
     setExpandedCard(expandedCard === cardId ? null : cardId);
@@ -107,15 +133,64 @@ export default function MetricsCards({ metrics }: MetricsCardsProps) {
         />
       </div>
 
-      {/* Cache Hit Rate */}
-      <MetricCard
-        title="Cache Hit Rate"
-        value={formatPercent(metrics.cacheHitRate ?? 0)}
-        subtitle={metrics.cacheHitRate > 0.5 ? "Excellent" : "Building cache..."}
-        icon={<Zap size={24} />}
-        color="green"
-        trend={metrics.cacheHitRate > 0.5 ? 'up' : undefined}
-      />
+      {/* Cache Hit Rate - Expandable */}
+      <div className={`${expandedCard === 'cache-hit-rate' ? 'md:col-span-2 lg:col-span-3' : ''}`}>
+        <ExpandableMetricCard
+          id="cache-hit-rate"
+          title="Cache Hit Rate"
+          value={formatPercent(metrics.cacheHitRate ?? 0)}
+          subtitle={metrics.cacheHitRate > 0.5 ? "Excellent" : "Building cache..."}
+          icon={<Zap size={24} />}
+          color="green"
+          trend={metrics.cacheHitRate > 0.5 ? 'up' : undefined}
+          isExpanded={expandedCard === 'cache-hit-rate'}
+          onToggle={toggleCard}
+          chart={
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-gray-700">Cache Hit Rate Trend</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={cacheHitRateData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis 
+                    dataKey="time" 
+                    tick={{ fontSize: 12 }}
+                    stroke="#6b7280"
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12 }}
+                    stroke="#6b7280"
+                    domain={[0, 100]}
+                    tickFormatter={(val) => `${val.toFixed(0)}%`}
+                    label={{ value: 'Hit Rate (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#fff', 
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      padding: '8px'
+                    }}
+                    labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
+                    formatter={(value: number) => `${value.toFixed(1)}%`}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="hitRatePercent" 
+                    stroke="#10b981" 
+                    strokeWidth={2}
+                    dot={{ fill: '#10b981', r: 3 }}
+                    activeDot={{ r: 5 }}
+                    name="Hit Rate"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+              <p className="text-sm text-gray-600 mt-4">
+                Monitor cache effectiveness over time. A rising trend indicates the cache is warming up and improving query performance.
+              </p>
+            </div>
+          }
+        />
+      </div>
 
       {/* Avg Cost */}
       <MetricCard
