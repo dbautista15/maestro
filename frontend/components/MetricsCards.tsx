@@ -4,6 +4,11 @@ import { useState, useMemo } from 'react';
 import { TrendingDown, TrendingUp, DollarSign, Zap, Database, Clock, Target, ChevronDown, ChevronUp } from 'lucide-react';
 import { AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+interface QueryTimeSeriesDataPoint {
+  timestamp: number;
+  queries: number;
+}
+
 interface MetricsCardsProps {
   metrics: {
     totalQueries: number;
@@ -13,9 +18,10 @@ interface MetricsCardsProps {
     costSaved: number;
     avgLatency: number;
   };
+  queryTimeSeries?: QueryTimeSeriesDataPoint[];
 }
 
-export default function MetricsCards({ metrics }: MetricsCardsProps) {
+export default function MetricsCards({ metrics, queryTimeSeries = [] }: MetricsCardsProps) {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   // Format numbers
@@ -23,30 +29,17 @@ export default function MetricsCards({ metrics }: MetricsCardsProps) {
   const formatPercent = (rate: number) => `${(rate * 100).toFixed(1)}%`;
   const formatMs = (ms: number) => `${Math.round(ms)}ms`;
 
-  // Generate mock time-series data for Total Queries
-  // TODO: Replace with actual backend time-series data
+  // Use real time-series data from backend (non-cumulative query counts per time bucket)
   const timeSeriesData = useMemo(() => {
-    const now = Date.now();
-    const dataPoints = 20;
-    const intervalMs = 60000; // 1 minute intervals
-    
-    return Array.from({ length: dataPoints }, (_, i) => {
-      const timestamp = now - (dataPoints - i - 1) * intervalMs;
-      // Simulate gradual growth with some randomness
-      const baseQueries = Math.floor((metrics.totalQueries * i) / dataPoints);
-      const variance = Math.random() * 2 - 1; // -1 to 1
-      const queries = Math.max(0, baseQueries + variance);
-      
-      return {
-        timestamp,
-        queries: Math.round(queries),
-        time: new Date(timestamp).toLocaleTimeString('en-US', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        }),
-      };
-    });
-  }, [metrics.totalQueries]);
+    return queryTimeSeries.map(point => ({
+      timestamp: point.timestamp,
+      queries: point.queries,
+      time: new Date(point.timestamp).toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }),
+    }));
+  }, [queryTimeSeries]);
 
   // Generate mock time-series data for Cache Hit Rate
   // TODO: Replace with actual backend time-series data
@@ -183,46 +176,47 @@ export default function MetricsCards({ metrics }: MetricsCardsProps) {
           color="gray"
           isExpanded={expandedCard === 'total-queries'}
           onToggle={toggleCard}
-          chart={
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-700">Query Volume Over Time</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={timeSeriesData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis 
-                    dataKey="time" 
-                    tick={{ fontSize: 12 }}
-                    stroke="#6b7280"
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 12 }}
-                    stroke="#6b7280"
-                    label={{ value: 'Queries', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#fff', 
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      padding: '8px'
-                    }}
-                    labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="queries" 
-                    stroke="#6b7280" 
-                    fill="#9ca3af" 
-                    fillOpacity={0.6}
-                    strokeWidth={2}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-              <p className="text-sm text-gray-600 mt-4">
-                Track query volume patterns to identify peak usage times and plan capacity accordingly.
-              </p>
-            </div>
-          }
+           chart={
+             <div>
+               <h3 className="text-lg font-semibold mb-4 text-gray-700">Query Volume Over Time</h3>
+               <ResponsiveContainer width="100%" height={300}>
+                 <AreaChart data={timeSeriesData}>
+                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                   <XAxis 
+                     dataKey="time" 
+                     tick={{ fontSize: 12 }}
+                     stroke="#6b7280"
+                   />
+                   <YAxis 
+                     tick={{ fontSize: 12 }}
+                     stroke="#6b7280"
+                     label={{ value: 'Queries per Minute', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+                   />
+                   <Tooltip 
+                     contentStyle={{ 
+                       backgroundColor: '#fff', 
+                       border: '1px solid #e5e7eb',
+                       borderRadius: '8px',
+                       padding: '8px'
+                     }}
+                     labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
+                     formatter={(value: number) => [`${value} queries`, 'Volume']}
+                   />
+                   <Area 
+                     type="monotone" 
+                     dataKey="queries" 
+                     stroke="#6b7280" 
+                     fill="#9ca3af" 
+                     fillOpacity={0.6}
+                     strokeWidth={2}
+                   />
+                 </AreaChart>
+               </ResponsiveContainer>
+               <p className="text-sm text-gray-600 mt-4">
+                 Shows the number of queries per time period. Track query volume patterns to identify peak usage times and plan capacity accordingly.
+               </p>
+             </div>
+           }
         />
       </div>
 

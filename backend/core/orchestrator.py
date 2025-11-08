@@ -263,3 +263,9 @@ class MaestroOrchestrator:
     def get_recent_queries(self, limit: int = 10) -> list:
         """Get recent queries for audit trail"""
         return self.metrics.get_recent_queries(limit)
+
+    def get_query_timeseries(
+        self, bucket_seconds: int = 60, num_buckets: int = 20
+    ) -> list:
+        """Get time-series data for query volume"""
+        return self.metrics.get_query_timeseries(bucket_seconds, num_buckets)

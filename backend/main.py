@@ -113,6 +113,27 @@ async def get_recent_queries(limit: int = 10):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/api/metrics/timeseries/queries")
+async def get_query_timeseries(bucket_seconds: int = 60, num_buckets: int = 20):
+    """
+    Get time-series data for query volume.
+    
+    Returns time-bucketed query counts for trend visualization.
+    
+    Args:
+        bucket_seconds: Size of each time bucket in seconds (default: 60 = 1 minute)
+        num_buckets: Number of time buckets to return (default: 20)
+        
+    WHY: Frontend needs time-series data to visualize query volume trends
+    and identify usage patterns. This enables managers to see peak times
+    and plan capacity accordingly.
+    """
+    try:
+        return {"data": orchestrator.get_query_timeseries(bucket_seconds, num_buckets)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/health")
 async def health_check():
     """Detailed health check"""

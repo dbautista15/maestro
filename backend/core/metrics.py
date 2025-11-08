@@ -116,3 +116,53 @@ class MetricsCollector:
         """Get recent queries for audit trail display"""
         recent = self.queries[-limit:]
         return [asdict(q) for q in reversed(recent)]
+
+    def get_query_timeseries(
+        self, bucket_seconds: int = 60, num_buckets: int = 20
+    ) -> List[Dict]:
+        """
+        Get time-series data for query volume.
+        
+        Buckets queries by time intervals for trend visualization.
+        
+        Args:
+            bucket_seconds: Size of each time bucket in seconds (default: 60 = 1 minute)
+            num_buckets: Number of time buckets to return (default: 20)
+            
+        Returns:
+            List of dicts with timestamp, queries count, and formatted time
+            
+        WHY: Frontend needs time-series data to show query volume trends.
+        This allows managers to see usage patterns and peak times.
+        """
+        if not self.queries:
+            return []
+        
+        # Get time range
+        now = time.time()
+        earliest_time = now - (bucket_seconds * num_buckets)
+        
+        # Create buckets
+        buckets = defaultdict(int)
+        
+        # Bucket each query by its timestamp
+        for query in self.queries:
+            if query.timestamp >= earliest_time:
+                # Calculate which bucket this query belongs to
+                bucket_index = int((query.timestamp - earliest_time) / bucket_seconds)
+                bucket_time = earliest_time + (bucket_index * bucket_seconds)
+                buckets[bucket_time] += 1
+        
+        # Build result with per-bucket counts
+        result = []
+        
+        for i in range(num_buckets):
+            bucket_time = earliest_time + (i * bucket_seconds)
+            count = buckets.get(bucket_time, 0)
+            
+            result.append({
+                "timestamp": int(bucket_time * 1000),  # Convert to milliseconds for JS
+                "queries": count,  # Queries in this time bucket
+            })
+        
+        return result

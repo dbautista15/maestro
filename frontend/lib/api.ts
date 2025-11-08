@@ -60,6 +60,11 @@ export interface RecentQuery {
   confidence: number;
 }
 
+export interface QueryTimeSeriesDataPoint {
+  timestamp: number;
+  queries: number;
+}
+
 export const queryAPI = {
   /**
    * Submit a query to the orchestrator
@@ -127,6 +132,19 @@ export const queryAPI = {
       latency: q.latency_ms ?? q.latency, // Backend sends latency_ms
       cost: q.cost,
       confidence: q.confidence,
+    }));
+  },
+
+  /**
+   * Get time-series data for query volume (non-cumulative)
+   */
+  async getQueryTimeSeries(bucketSeconds: number = 60, numBuckets: number = 20): Promise<QueryTimeSeriesDataPoint[]> {
+    const response = await api.get(`/api/metrics/timeseries/queries?bucket_seconds=${bucketSeconds}&num_buckets=${numBuckets}`);
+    const data = response.data.data;
+
+    return data.map((point: any) => ({
+      timestamp: point.timestamp,
+      queries: point.queries,
     }));
   },
 

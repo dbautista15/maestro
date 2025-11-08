@@ -5,7 +5,7 @@ import QueryInput from '@/components/QueryInput';
 import MetricsCards from '@/components/MetricsCards';
 import ResultDisplay from '@/components/ResultDisplay';
 import AuditTrail from '@/components/AuditTrail';
-import { queryAPI, type QueryResponse, type Metrics, type RecentQuery } from '@/lib/api';
+import { queryAPI, type QueryResponse, type Metrics, type RecentQuery, type QueryTimeSeriesDataPoint } from '@/lib/api';
 import { AlertCircle } from 'lucide-react';
 
 export default function Dashboard() {
@@ -14,16 +14,19 @@ export default function Dashboard() {
   const [result, setResult] = useState<QueryResponse | null>(null);
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [recentQueries, setRecentQueries] = useState<RecentQuery[]>([]);
+  const [queryTimeSeries, setQueryTimeSeries] = useState<QueryTimeSeriesDataPoint[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch metrics on mount and every 5 seconds
   useEffect(() => {
     fetchMetrics();
     fetchRecentQueries();
+    fetchQueryTimeSeries();
 
     const interval = setInterval(() => {
       fetchMetrics();
       fetchRecentQueries();
+      fetchQueryTimeSeries();
     }, 5000); // Update every 5 seconds
 
     return () => clearInterval(interval);
@@ -47,6 +50,15 @@ export default function Dashboard() {
     }
   };
 
+  const fetchQueryTimeSeries = async () => {
+    try {
+      const data = await queryAPI.getQueryTimeSeries(60, 20);
+      setQueryTimeSeries(data);
+    } catch (err) {
+      console.error('Failed to fetch query time series:', err);
+    }
+  };
+
   const handleQuery = async (query: string, strategy?: string) => {
     setLoading(true);
     setError(null);
@@ -59,9 +71,10 @@ export default function Dashboard() {
 
       setResult(response);
       
-      // Refresh metrics and audit trail
+      // Refresh metrics, time series, and audit trail
       await fetchMetrics();
       await fetchRecentQueries();
+      await fetchQueryTimeSeries();
 
     } catch (err: any) {
       console.error('Query failed:', err);
@@ -123,7 +136,7 @@ export default function Dashboard() {
           <div className="lg:col-span-2 h-full">
             <div className="lg:sticky lg:top-8">
               {metrics && (
-                <MetricsCards metrics={metrics} />
+                <MetricsCards metrics={metrics} queryTimeSeries={queryTimeSeries} />
               )}
             </div>
           </div>
