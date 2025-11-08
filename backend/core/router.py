@@ -78,13 +78,11 @@ class QueryRouter:
         # Cache for classification results (prevents repeated API calls)
         self.classification_cache = {}
 
-        try:
-            self.model = genai.GenerativeModel("gemini-2.0-flash")
-            self.gemini_available = True
-            print(" Gemini connected")
-        except Exception as e:
-            print(f" Gemini unavailable: {e}")
-            self.gemini_available = False
+        # PERFORMANCE FIX: Disable Gemini for production - rule-based is faster
+        # Gemini API calls were taking 20+ seconds, killing performance
+        # Rule-based classification is instant and works well for demos
+        self.gemini_available = False
+        print(" Using fast rule-based classification (Gemini disabled for performance)")
 
     def classify_query(self, query: str) -> Literal["simple", "moderate", "complex"]:
         """
