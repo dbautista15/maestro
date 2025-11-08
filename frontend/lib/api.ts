@@ -4,7 +4,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://0.0.0.0:8000';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, // 30 seconds (some queries might be slow)
+  timeout: 60000, // 60 seconds (handles cold starts when backend wakes up + model loading)
   headers: {
     'Content-Type': 'application/json',
   },
@@ -74,32 +74,65 @@ export interface CacheHitRateTimeSeriesDataPoint {
 export const queryAPI = {
   /**
    * Submit a query to the orchestrator
+   * Retries once on timeout (for cold starts)
    */
   async process(request: QueryRequest): Promise<QueryResponse> {
-    const response = await api.post('/api/query', request);
-    const data = response.data;
+    try {
+      const response = await api.post('/api/query', request);
+      const data = response.data;
 
-    // Transform snake_case to camelCase
-    return {
-      answer: data.answer,
-      documents: data.documents.map((doc: any) => ({
-        id: doc.id,
-        title: doc.title,
-        category: doc.category,
-        similarityScore: doc.similarity_score ?? doc.similarityScore,
-        contentPreview: doc.content_preview ?? doc.contentPreview,
-      })),
-      confidence: data.confidence,
-      cost: data.cost,
-      latency: data.latency_ms ?? data.latency, // Backend sends latency_ms
-      source: data.source,
-      strategy: data.strategy,
-      complexity: data.complexity,
-      numDocumentsRetrieved: data.num_documents_retrieved ?? data.numDocumentsRetrieved,
-      cacheSimilarity: data.cache_similarity ?? data.cacheSimilarity,
-      originalQuery: data.original_query ?? data.originalQuery,
-      hitCount: data.hit_count ?? data.hitCount,
-    };
+      // Transform snake_case to camelCase
+      return {
+        answer: data.answer,
+        documents: data.documents.map((doc: any) => ({
+          id: doc.id,
+          title: doc.title,
+          category: doc.category,
+          similarityScore: doc.similarity_score ?? doc.similarityScore,
+          contentPreview: doc.content_preview ?? doc.contentPreview,
+        })),
+        confidence: data.confidence,
+        cost: data.cost,
+        latency: data.latency_ms ?? data.latency, // Backend sends latency_ms
+        source: data.source,
+        strategy: data.strategy,
+        complexity: data.complexity,
+        numDocumentsRetrieved: data.num_documents_retrieved ?? data.numDocumentsRetrieved,
+        cacheSimilarity: data.cache_similarity ?? data.cacheSimilarity,
+        originalQuery: data.original_query ?? data.originalQuery,
+        hitCount: data.hit_count ?? data.hitCount,
+      };
+    } catch (error: any) {
+      // If timeout on first attempt (cold start), retry once
+      if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
+        console.log('First request timed out (likely cold start), retrying...');
+        const response = await api.post('/api/query', request);
+        const data = response.data;
+
+        return {
+          answer: data.answer,
+          documents: data.documents.map((doc: any) => ({
+            id: doc.id,
+            title: doc.title,
+            category: doc.category,
+            similarityScore: doc.similarity_score ?? doc.similarityScore,
+            contentPreview: doc.content_preview ?? doc.contentPreview,
+          })),
+          confidence: data.confidence,
+          cost: data.cost,
+          latency: data.latency_ms ?? data.latency,
+          source: data.source,
+          strategy: data.strategy,
+          complexity: data.complexity,
+          numDocumentsRetrieved: data.num_documents_retrieved ?? data.numDocumentsRetrieved,
+          cacheSimilarity: data.cache_similarity ?? data.cacheSimilarity,
+          originalQuery: data.original_query ?? data.originalQuery,
+          hitCount: data.hit_count ?? data.hitCount,
+        };
+      }
+      // Re-throw other errors
+      throw error;
+    }
   },
 
   /**

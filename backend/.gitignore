@@ -5,9 +5,10 @@ env/
 # Environment variables
 .env
 
-# Data files (embeddings are large, regenerate locally)
-data/*.npy
+# Data files (pickle files are large, regenerate locally)
 data/*.pkl
+
+# Note: embeddings.npy is now committed (15KB, needed for Railway deployment)
 
 # But keep JSON documents (small, needed for setup)
 !data/*.json
@@ -16,3 +17,6 @@ data/*.pkl
 # Python cache
 __pycache__/
 *.pyc
+
+# Downloaded models (large, will be cached on Railway)
+models/

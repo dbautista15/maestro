@@ -56,8 +56,9 @@ class QueryResponse(BaseModel):
 
 
 @app.get("/")
+@app.head("/")
 async def root():
-    """Health check endpoint"""
+    """Health check endpoint - supports both GET and HEAD"""
     return {"service": "Maestro", "status": "operational", "version": "1.0.0"}
 
 
@@ -155,8 +156,9 @@ async def get_cache_hit_rate_timeseries(bucket_seconds: int = 60, num_buckets: i
 
 
 @app.get("/api/health")
+@app.head("/api/health")
 async def health_check():
-    """Detailed health check"""
+    """Detailed health check - supports both GET and HEAD"""
     return {
         "status": "healthy",
         "components": {
