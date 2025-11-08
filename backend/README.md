@@ -1,5 +1,7 @@
 # Maestro Backend
 
+running tests ( make sure you are in the backend folder and not the test one though): source venv/bin/activate -> pytest test/test\_\*.py -v
+
 ## Structure
 
 ```
