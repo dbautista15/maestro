@@ -5,6 +5,7 @@ import QueryInput from '@/components/QueryInput';
 import MetricsCards from '@/components/MetricsCards';
 import ResultDisplay from '@/components/ResultDisplay';
 import AuditTrail from '@/components/AuditTrail';
+import AdversarialTester from '@/components/AdversarialTester';
 import { queryAPI, type QueryResponse, type Metrics, type RecentQuery, type QueryTimeSeriesDataPoint, type CacheHitRateTimeSeriesDataPoint, type AvgCostTimeSeriesDataPoint, type AvgLatencyTimeSeriesDataPoint, type CumulativeCostTimeSeriesDataPoint } from '@/lib/api';
 import { AlertCircle } from 'lucide-react';
 
@@ -186,10 +187,10 @@ export default function Dashboard() {
 
           {/* Right Column - Metrics */}
           <div className="lg:col-span-2 h-full">
-            <div className="lg:sticky lg:top-8">
+            <div className="lg:sticky lg:top-8 space-y-4">
               {metrics && (
-                <MetricsCards 
-                  metrics={metrics} 
+                <MetricsCards
+                  metrics={metrics}
                   queryTimeSeries={queryTimeSeries}
                   cacheHitRateTimeSeries={cacheHitRateTimeSeries}
                   avgCostTimeSeries={avgCostTimeSeries}
@@ -197,6 +198,9 @@ export default function Dashboard() {
                   cumulativeCostTimeSeries={cumulativeCostTimeSeries}
                 />
               )}
+
+              {/* Adversarial Testing */}
+              <AdversarialTester />
             </div>
           </div>
         </div>

@@ -9,6 +9,7 @@ from typing import Optional
 import os
 
 from core.orchestrator import MaestroOrchestrator, OrchestratorConfig
+from api.adversarial_routes import router as adversarial_router, init_adversarial_tester
 
 # Initialize FastAPI
 app = FastAPI(
@@ -32,6 +33,12 @@ orchestrator = MaestroOrchestrator(
         use_cache=True, cache_threshold=0.88, max_cost_per_query=0.05
     )
 )
+
+# Initialize adversarial testing system
+init_adversarial_tester(orchestrator)
+
+# Include adversarial testing routes
+app.include_router(adversarial_router, prefix="/api/adversarial", tags=["adversarial"])
 
 
 # Request/Response models

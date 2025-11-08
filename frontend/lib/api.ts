@@ -274,4 +274,114 @@ export const queryAPI = {
   },
 };
 
+// ========== ADVERSARIAL TESTING API ==========
+
+export interface ChallengeQuery {
+  query: string;
+  type: string;
+  expectedCategories: string[];
+  difficulty: string;
+  description: string;
+}
+
+export interface TestResult {
+  query: string;
+  passed: boolean;
+  confidence: number;
+  weakness: string | null;
+  recommendation: string | null;
+}
+
+export interface AdversarialReport {
+  summary: {
+    totalTests: number;
+    passed: number;
+    failed: number;
+    passRate: number;
+  };
+  results: Array<{
+    query: string;
+    type: string;
+    difficulty: string;
+    description: string;
+    passed: boolean;
+    confidence: number;
+    weakness: string | null;
+    recommendation: string | null;
+  }>;
+  weaknessesDetected: Array<any>;
+  failuresByType: Record<string, any[]>;
+  recommendations: string[];
+}
+
+export const adversarialAPI = {
+  /**
+   * Get AI-generated challenge queries
+   */
+  async getChallenges(regenerate: boolean = false): Promise<ChallengeQuery[]> {
+    const response = await api.get(`/api/adversarial/challenges?regenerate=${regenerate}`);
+    const data = response.data;
+
+    return data.challenges.map((c: any) => ({
+      query: c.query,
+      type: c.type,
+      expectedCategories: c.expected_categories ?? c.expectedCategories,
+      difficulty: c.difficulty,
+      description: c.description,
+    }));
+  },
+
+  /**
+   * Run a single adversarial test
+   */
+  async runTest(query: string): Promise<TestResult> {
+    const response = await api.post('/api/adversarial/test', { query });
+    return response.data;
+  },
+
+  /**
+   * Run full adversarial test suite and get report
+   * Note: This can take 30-60 seconds
+   */
+  async getReport(): Promise<AdversarialReport> {
+    const response = await api.get('/api/adversarial/report', {
+      timeout: 120000, // 2 minutes for full suite
+    });
+    const data = response.data;
+
+    return {
+      summary: {
+        totalTests: data.summary.total_tests ?? data.summary.totalTests,
+        passed: data.summary.passed,
+        failed: data.summary.failed,
+        passRate: data.summary.pass_rate ?? data.summary.passRate,
+      },
+      results: data.results,
+      weaknessesDetected: data.weaknesses_detected ?? data.weaknessesDetected,
+      failuresByType: data.failures_by_type ?? data.failuresByType,
+      recommendations: data.recommendations,
+    };
+  },
+
+  /**
+   * Check adversarial system health
+   */
+  async healthCheck(): Promise<{
+    status: string;
+    geminiApi: string;
+    cachedQueries: number;
+    message: string;
+  }> {
+    const response = await api.get('/api/adversarial/health');
+    const data = response.data;
+
+    return {
+      status: data.status,
+      geminiApi: data.gemini_api ?? data.geminiApi,
+      cachedQueries: data.cached_queries ?? data.cachedQueries,
+      message: data.message,
+    };
+  },
+};
+
 export default api;

@@ -75,13 +75,14 @@ class QueryRouter:
     """
 
     def __init__(self):
-        try:
-            self.model = genai.GenerativeModel("gemini-2.0-flash")
-            self.gemini_available = True
-            print(" Gemini connected")
-        except Exception as e:
-            print(f" Gemini unavailable: {e}")
-            self.gemini_available = False
+        # Cache for classification results (prevents repeated API calls)
+        self.classification_cache = {}
+
+        # PERFORMANCE FIX: Disable Gemini for production - rule-based is faster
+        # Gemini API calls were taking 20+ seconds, killing performance
+        # Rule-based classification is instant and works well for demos
+        self.gemini_available = False
+        print(" Using fast rule-based classification (Gemini disabled for performance)")
 
     def classify_query(self, query: str) -> Literal["simple", "moderate", "complex"]:
         """
@@ -92,17 +93,27 @@ class QueryRouter:
         - Moderate: "How do I return an item?" (requires context)
         - Complex: "Compare your pricing to competitors" (analysis)
         """
+        # Check cache first (avoid redundant API calls)
+        query_normalized = query.lower().strip()
+        if query_normalized in self.classification_cache:
+            return self.classification_cache[query_normalized]
+
         # Try Gemini first
         if self.gemini_available:
             try:
                 classification = self._classify_with_gemini(query)
                 if classification:
+                    # Cache the result
+                    self.classification_cache[query_normalized] = classification
                     return classification
             except Exception as e:
                 print(f"Gemini classification failed: {e}, using fallback")
 
         # Fallback to rule-based
-        return self._classify_with_rules(query)
+        result = self._classify_with_rules(query)
+        # Cache fallback results too
+        self.classification_cache[query_normalized] = result
+        return result
 
     def _classify_with_gemini(
         self, query: str
