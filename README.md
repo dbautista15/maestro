@@ -1,5 +1,22 @@
 # Maestro 🎯
 
+Adversarial RAG Innovation - First AI-powered testing system for RAG pipelines
+Performance - 240x faster cache hits, 67% cost reduction
+Production-Ready - 62 passing tests, error handling, graceful fallbacks
+Plug-and-Play - Works with any vector DB and LLM
+Full Observability - Real-time dashboards and audit trails
+
+# Highlights:
+
+Professional overview with badges and live demo link
+Clear problem/solution narrative
+Architecture diagram showing Maestro's orchestration layer
+Performance comparison table (240x faster, 100% cost savings)
+Key innovation: Adversarial RAG explained clearly
+Live demo scenarios and API endpoints
+Technical highlights with 5 key subsystems
+Technology stack and project structure
+Team info and roadmap
 **Enterprise RAG Orchestration Layer with AI-Powered Adversarial Testing**
 
 > Transform your black-box LLM into a transparent, optimized, and battle-tested system.
@@ -73,6 +90,7 @@ Maestro includes the industry's first **AI-powered adversarial testing system** 
 ### Core Components
 
 **Backend (Python/FastAPI)**
+
 - `MaestroOrchestrator` - Core orchestration logic with configurable strategies
 - `SemanticCache` - Embedding-based caching (0.88 similarity threshold)
 - `QueryRouter` - Complexity classification and strategy selection
@@ -80,6 +98,7 @@ Maestro includes the industry's first **AI-powered adversarial testing system** 
 - `MetricsEngine` - Real-time analytics and cost tracking
 
 **Frontend (Next.js 14/React)**
+
 - Real-time metrics dashboard with time-series charts
 - Interactive query interface with confidence visualization
 - Adversarial testing UI with live test execution
@@ -87,13 +106,14 @@ Maestro includes the industry's first **AI-powered adversarial testing system** 
 
 ## ⚡ Performance
 
-| Metric | Cache Hit | Cache Miss | Improvement |
-|--------|-----------|------------|-------------|
-| **Latency** | 5ms | 800-1200ms | **240x faster** |
-| **Cost** | $0.000 | $0.015-0.030 | **100% savings** |
-| **Throughput** | 200 qps | 5-10 qps | **20-40x higher** |
+| Metric         | Cache Hit | Cache Miss   | Improvement       |
+| -------------- | --------- | ------------ | ----------------- |
+| **Latency**    | 5ms       | 800-1200ms   | **240x faster**   |
+| **Cost**       | $0.000    | $0.015-0.030 | **100% savings**  |
+| **Throughput** | 200 qps   | 5-10 qps     | **20-40x higher** |
 
 **Real Demo Results:**
+
 - 60%+ cache hit rate after warmup
 - 67% cost reduction through intelligent caching
 - Sub-second response times for cached queries
@@ -102,34 +122,43 @@ Maestro includes the industry's first **AI-powered adversarial testing system** 
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Python 3.9+
 - Node.js 18+
 - GEMINI_API_KEY (for adversarial testing)
 
 ### Backend Setup
+
 \`\`\`bash
 cd backend
 pip install -r requirements.txt
 
 # Configure environment
+
 cp .env.example .env
+
 # Edit .env and add your GEMINI_API_KEY
 
 # Start server
+
 python main.py
 \`\`\`
 **Server runs at:** http://localhost:8000
 
 ### Frontend Setup
+
 \`\`\`bash
 cd frontend
 npm install
 
 # Configure environment
+
 cp .env.local.example .env.local
+
 # NEXT_PUBLIC_API_URL=http://localhost:8000
 
 # Start dev server
+
 npm run dev
 \`\`\`
 **Dashboard runs at:** http://localhost:3000
@@ -141,11 +170,13 @@ npm run dev
 ### Demo Scenarios
 
 1. **Query Optimization**
+
    - Submit similar queries to see semantic caching in action
    - Watch latency drop from 1000ms to 5ms
    - Track cost savings in real-time
 
 2. **Adversarial Testing**
+
    - Expand the "Adversarial Testing" panel
    - Click "Regenerate" to generate new AI-powered challenge queries
    - Run individual tests to see pass/fail results
@@ -160,17 +191,20 @@ npm run dev
 ## 📊 API Endpoints
 
 ### Query Processing
+
 - `POST /api/query` - Process query with automatic optimization
 - `GET /api/metrics` - Get current system metrics
 - `GET /api/recent-queries` - Get query audit trail
 
 ### Adversarial Testing
+
 - `GET /api/adversarial/challenges` - Get AI-generated test queries
 - `POST /api/adversarial/test` - Run single adversarial test
 - `GET /api/adversarial/report` - Generate full weakness report
 - `GET /api/adversarial/health` - Check Gemini API status
 
 ### Time-Series Analytics
+
 - `GET /api/metrics/timeseries/queries` - Query volume trends
 - `GET /api/metrics/timeseries/cache-hit-rate` - Cache effectiveness
 - `GET /api/metrics/timeseries/avg-cost` - Cost optimization trends
@@ -182,18 +216,21 @@ npm run dev
 ## 🎯 Technical Highlights
 
 ### 1. Semantic Caching (70% Cost Reduction)
+
 - Uses sentence-transformers (all-MiniLM-L6-v2) for embeddings
 - Cosine similarity matching with 0.88 threshold
 - LRU eviction with configurable max size
 - **Result:** 60%+ hit rate, $0.000 cost per cached query
 
 ### 2. Smart Query Routing (5x Latency Improvement)
+
 - Rule-based classification (simple/moderate/complex)
 - Strategy mapping (fast/balanced/comprehensive)
 - Classification result caching
 - **Result:** Instant routing decisions, no API overhead
 
 ### 3. Adversarial Testing System (AI-Powered QA)
+
 - Gemini 2.0 Flash for intelligent query generation
 - Cross-domain, edge-case, multi-hop, and contradiction queries
 - Automated weakness analysis with actionable recommendations
@@ -201,12 +238,14 @@ npm run dev
 - **Result:** Proactive quality assurance, catch issues before production
 
 ### 4. Performance Optimization
+
 - Model singleton caching (avoid re-downloads)
 - Gemini disabled for hot path (20s → <1s latency)
 - Time-series metrics with configurable bucketing
 - **Result:** Production-ready performance
 
 ### 5. Full Test Coverage
+
 - 62 backend tests (100% passing)
 - End-to-end integration tests
 - Unit tests for all core components
@@ -215,16 +254,19 @@ npm run dev
 ## 🏆 Why Maestro Wins
 
 ### For Engineers
+
 - **Plug-and-play** - Works with any vector DB and LLM
 - **Observable** - See exactly what's happening under the hood
 - **Optimized** - Automatic caching and routing, no manual tuning
 
 ### For Managers
+
 - **Cost Reduction** - 60-80% savings through intelligent caching
 - **Risk Mitigation** - Adversarial testing catches issues early
 - **Transparency** - Real-time dashboards for decision-making
 
 ### For Enterprises
+
 - **Quality Assurance** - AI-powered testing before deployment
 - **Scalability** - Cache warming improves performance over time
 - **Compliance** - Full audit trail of all queries and responses
@@ -232,6 +274,7 @@ npm run dev
 ## 🛠️ Technology Stack
 
 **Backend**
+
 - FastAPI (high-performance async API)
 - SentenceTransformers (semantic embeddings)
 - Google Gemini 2.0 (adversarial testing)
@@ -240,6 +283,7 @@ npm run dev
 - Pytest (testing framework)
 
 **Frontend**
+
 - Next.js 14 (React framework)
 - Recharts (time-series visualization)
 - Tailwind CSS (styling)
@@ -247,6 +291,7 @@ npm run dev
 - Axios (API client with retry logic)
 
 **Infrastructure**
+
 - Railway (deployment platform)
 - Git (version control)
 - Docker-ready (containerization)
@@ -255,27 +300,27 @@ npm run dev
 
 \`\`\`
 maestro/
-├── backend/              # FastAPI orchestration layer
-│   ├── core/            # Core orchestration logic
-│   │   ├── orchestrator.py    # Main orchestration engine
-│   │   ├── cache.py           # Semantic caching
-│   │   ├── router.py          # Query routing
-│   │   ├── metrics.py         # Analytics engine
-│   │   └── adversarial.py     # Adversarial testing
-│   ├── api/             # API routes
-│   │   └── adversarial_routes.py  # Adversarial endpoints
-│   ├── adapters/        # Vector DB adapters
-│   ├── test/            # Test suite (62 tests)
-│   └── main.py          # FastAPI entrypoint
+├── backend/ # FastAPI orchestration layer
+│ ├── core/ # Core orchestration logic
+│ │ ├── orchestrator.py # Main orchestration engine
+│ │ ├── cache.py # Semantic caching
+│ │ ├── router.py # Query routing
+│ │ ├── metrics.py # Analytics engine
+│ │ └── adversarial.py # Adversarial testing
+│ ├── api/ # API routes
+│ │ └── adversarial_routes.py # Adversarial endpoints
+│ ├── adapters/ # Vector DB adapters
+│ ├── test/ # Test suite (62 tests)
+│ └── main.py # FastAPI entrypoint
 │
-└── frontend/            # Next.js dashboard
-    ├── app/             # App router
-    ├── components/      # React components
-    │   ├── QueryInterface.tsx      # Query input
-    │   ├── MetricsCards.tsx        # Analytics dashboard
-    │   ├── AuditTrail.tsx          # Query history
-    │   └── AdversarialTester.tsx   # Testing UI
-    └── lib/             # API client and utilities
+└── frontend/ # Next.js dashboard
+├── app/ # App router
+├── components/ # React components
+│ ├── QueryInterface.tsx # Query input
+│ ├── MetricsCards.tsx # Analytics dashboard
+│ ├── AuditTrail.tsx # Query history
+│ └── AdversarialTester.tsx # Testing UI
+└── lib/ # API client and utilities
 \`\`\`
 
 ## 👥 Team
@@ -301,4 +346,4 @@ MIT License - See LICENSE file for details
 
 **Maestro: Making LLMs transparent, optimized, and battle-tested.** 🎯
 
-*Built for AI ATL Hackathon - Transforming reactive RAG into proactive, enterprise-ready infrastructure.*
+_Built for AI ATL Hackathon - Transforming reactive RAG into proactive, enterprise-ready infrastructure._

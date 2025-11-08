@@ -1,5 +1,16 @@
 # Maestro Frontend 🎨
 
+# Highlights:
+
+Component-by-component documentation
+Interactive features breakdown (Query Interface, Metrics Dashboard, Adversarial Tester, Audit Trail)
+API client architecture with type-safe interfaces
+Detailed setup instructions
+Development workflow and styling guidelines
+Performance optimizations
+Deployment guide
+Troubleshooting section
+
 **Real-Time Analytics Dashboard for Enterprise RAG**
 
 Built with Next.js 14, React, and Tailwind CSS
@@ -13,12 +24,14 @@ The Maestro frontend provides a comprehensive, real-time dashboard for monitorin
 ## Key Features
 
 ### 1. Interactive Query Interface
+
 - **Real-time Query Execution** - Submit queries and see instant results
 - **Confidence Visualization** - Visual indicators for answer quality (high/medium/low)
 - **Document Attribution** - See exactly which documents contributed to each answer
 - **Cost & Latency Tracking** - Monitor performance metrics per query
 
 ### 2. Real-Time Metrics Dashboard
+
 - **Query Volume Trends** - Time-series charts showing query patterns
 - **Cache Hit Rate Evolution** - Visualize cache effectiveness over time
 - **Cost Optimization Tracking** - Compare naive vs actual costs
@@ -26,6 +39,7 @@ The Maestro frontend provides a comprehensive, real-time dashboard for monitorin
 - **Live Updates** - Metrics refresh every 5 seconds
 
 ### 3. Adversarial Testing UI
+
 - **AI-Generated Challenges** - Gemini-powered test query generation
 - **Live Test Execution** - Run tests and see results in real-time
 - **Pass/Fail Indicators** - Visual feedback on test outcomes
@@ -33,6 +47,7 @@ The Maestro frontend provides a comprehensive, real-time dashboard for monitorin
 - **Summary Statistics** - Track overall test pass rates
 
 ### 4. Query Audit Trail
+
 - **Complete History** - Full log of all processed queries
 - **Source Tracking** - Cache hit vs retrieval indicators
 - **Strategy Breakdown** - See which routing strategy was used
@@ -52,30 +67,32 @@ The Maestro frontend provides a comprehensive, real-time dashboard for monitorin
 
 \`\`\`
 frontend/
-├── app/                    # Next.js app router
-│   ├── layout.tsx         # Root layout
-│   ├── page.tsx           # Main dashboard page
-│   └── globals.css        # Global styles
+├── app/ # Next.js app router
+│ ├── layout.tsx # Root layout
+│ ├── page.tsx # Main dashboard page
+│ └── globals.css # Global styles
 │
-├── components/            # React components
-│   ├── QueryInterface.tsx      # Query input/output UI
-│   ├── MetricsCards.tsx        # Analytics dashboard with charts
-│   ├── AuditTrail.tsx          # Query history table
-│   └── AdversarialTester.tsx   # Adversarial testing panel
+├── components/ # React components
+│ ├── QueryInterface.tsx # Query input/output UI
+│ ├── MetricsCards.tsx # Analytics dashboard with charts
+│ ├── AuditTrail.tsx # Query history table
+│ └── AdversarialTester.tsx # Adversarial testing panel
 │
-├── lib/                   # Utilities and API client
-│   └── api.ts            # Axios API client with type-safe endpoints
+├── lib/ # Utilities and API client
+│ └── api.ts # Axios API client with type-safe endpoints
 │
-├── public/               # Static assets
-└── package.json          # Dependencies
+├── public/ # Static assets
+└── package.json # Dependencies
 \`\`\`
 
 ## Component Architecture
 
 ### QueryInterface.tsx
+
 **Purpose:** Main query input/output component
 
 **Features:**
+
 - Text input with submit button
 - Loading states during query execution
 - Confidence score visualization with color coding
@@ -92,24 +109,29 @@ const [error, setError] = useState<string | null>(null);
 \`\`\`
 
 ### MetricsCards.tsx
+
 **Purpose:** Real-time analytics dashboard
 
 **Features:**
+
 - 5 metric cards (queries, cache rate, cost, latency, savings)
 - 4 time-series charts (query volume, cache rate, cost comparison, latency)
 - Auto-refresh every 5 seconds
 - Responsive grid layout
 
 **Charts:**
+
 - Line charts for trends
 - Area charts for cumulative metrics
 - Custom tooltips with formatted values
 - Color-coded data series
 
 ### AdversarialTester.tsx
+
 **Purpose:** AI-powered testing interface
 
 **Features:**
+
 - Collapsible panel (starts collapsed)
 - Gemini status indicator
 - Challenge query list with metadata
@@ -121,18 +143,20 @@ const [error, setError] = useState<string | null>(null);
 **Challenge Query Display:**
 \`\`\`typescript
 interface ChallengeQuery {
-  query: string;
-  type: string;  // cross_domain, edge_case, multi_hop
-  expectedCategories: string[];
-  difficulty: string;  // easy, medium, hard
-  description: string;
+query: string;
+type: string; // cross_domain, edge_case, multi_hop
+expectedCategories: string[];
+difficulty: string; // easy, medium, hard
+description: string;
 }
 \`\`\`
 
 ### AuditTrail.tsx
+
 **Purpose:** Query history table
 
 **Features:**
+
 - Reverse chronological order (newest first)
 - Expandable rows for full query text
 - Source badges (cache/retrieval)
@@ -147,23 +171,23 @@ interface ChallengeQuery {
 \`\`\`typescript
 // Main query API
 export const queryAPI = {
-  process(request: QueryRequest): Promise<QueryResponse>
-  getMetrics(): Promise<Metrics>
-  getRecentQueries(limit?: number): Promise<RecentQuery[]>
-  getQueryTimeSeries(bucketSeconds, numBuckets): Promise<QueryTimeSeriesDataPoint[]>
-  getCacheHitRateTimeSeries(...): Promise<CacheHitRateTimeSeriesDataPoint[]>
-  getAvgCostTimeSeries(...): Promise<AvgCostTimeSeriesDataPoint[]>
-  getAvgLatencyTimeSeries(...): Promise<AvgLatencyTimeSeriesDataPoint[]>
-  getCumulativeCostTimeSeries(...): Promise<CumulativeCostTimeSeriesDataPoint[]>
-  healthCheck(): Promise<{ status: string }>
+process(request: QueryRequest): Promise<QueryResponse>
+getMetrics(): Promise<Metrics>
+getRecentQueries(limit?: number): Promise<RecentQuery[]>
+getQueryTimeSeries(bucketSeconds, numBuckets): Promise<QueryTimeSeriesDataPoint[]>
+getCacheHitRateTimeSeries(...): Promise<CacheHitRateTimeSeriesDataPoint[]>
+getAvgCostTimeSeries(...): Promise<AvgCostTimeSeriesDataPoint[]>
+getAvgLatencyTimeSeries(...): Promise<AvgLatencyTimeSeriesDataPoint[]>
+getCumulativeCostTimeSeries(...): Promise<CumulativeCostTimeSeriesDataPoint[]>
+healthCheck(): Promise<{ status: string }>
 }
 
 // Adversarial testing API
 export const adversarialAPI = {
-  getChallenges(regenerate?: boolean): Promise<ChallengeQuery[]>
-  runTest(query: string): Promise<TestResult>
-  getReport(): Promise<AdversarialReport>
-  healthCheck(): Promise<{ status, geminiApi, cachedQueries, message }>
+getChallenges(regenerate?: boolean): Promise<ChallengeQuery[]>
+runTest(query: string): Promise<TestResult>
+getReport(): Promise<AdversarialReport>
+healthCheck(): Promise<{ status, geminiApi, cachedQueries, message }>
 }
 \`\`\`
 
@@ -181,22 +205,24 @@ The API client automatically transforms backend responses:
 Handles Railway cold starts with automatic retry:
 \`\`\`typescript
 catch (error) {
-  if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
-    // Retry once for cold start
-    return await api.post('/api/query', request);
-  }
-  throw error;
+if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
+// Retry once for cold start
+return await api.post('/api/query', request);
+}
+throw error;
 }
 \`\`\`
 
 ## Setup Instructions
 
 ### 1. Install Dependencies
+
 \`\`\`bash
 npm install
 \`\`\`
 
 ### 2. Configure Environment
+
 Create `.env.local`:
 \`\`\`bash
 NEXT_PUBLIC_API_URL=http://localhost:8000
@@ -208,6 +234,7 @@ NEXT_PUBLIC_API_URL=https://your-backend-url.up.railway.app
 \`\`\`
 
 ### 3. Run Development Server
+
 \`\`\`bash
 npm run dev
 \`\`\`
@@ -215,6 +242,7 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000)
 
 ### 4. Build for Production
+
 \`\`\`bash
 npm run build
 npm start
@@ -235,8 +263,8 @@ Example:
 import { QueryResponse } from '@/lib/api';
 
 export default function MyComponent() {
-  const [data, setData] = useState<QueryResponse | null>(null);
-  // ...
+const [data, setData] = useState<QueryResponse | null>(null);
+// ...
 }
 \`\`\`
 
@@ -250,12 +278,14 @@ export default function MyComponent() {
 ### Styling Guidelines
 
 **Use Tailwind utility classes:**
+
 - Spacing: `p-4`, `m-2`, `space-y-4`
 - Colors: `bg-gray-50`, `text-blue-600`, `border-gray-200`
 - Layout: `flex`, `grid`, `grid-cols-2`
 - Responsive: `lg:grid-cols-4`, `md:space-y-0`
 
 **Consistent color scheme:**
+
 - Cache hit: `bg-green-50`, `text-green-600`
 - Cache miss: `bg-purple-50`, `text-purple-600`
 - High confidence: `bg-green-100`, `text-green-900`
@@ -265,16 +295,19 @@ export default function MyComponent() {
 ## Performance Optimizations
 
 ### 1. Efficient Re-rendering
+
 - Use `useState` for local state
 - Use `useEffect` with proper dependencies
 - Memoize expensive calculations
 
 ### 2. API Call Management
+
 - Poll metrics every 5 seconds (not more frequently)
 - Load adversarial challenges only when expanded
 - Use loading states to prevent duplicate requests
 
 ### 3. Chart Performance
+
 - Limit data points (20 buckets default)
 - Use responsive containers
 - Disable animations for large datasets
@@ -282,32 +315,41 @@ export default function MyComponent() {
 ## Deployment
 
 ### Railway (Current Production)
+
 \`\`\`bash
+
 # From frontend directory
+
 railway link
 railway up
 \`\`\`
 
 ### Vercel (Recommended for Next.js)
+
 \`\`\`bash
 vercel
 \`\`\`
 
 ### Environment Variables in Production
+
 - `NEXT_PUBLIC_API_URL` - Backend API URL
 
 ## Troubleshooting
 
 ### Issue: "Failed to fetch" errors
+
 **Solution:** Check that backend is running and `NEXT_PUBLIC_API_URL` is correct
 
 ### Issue: CORS errors
+
 **Solution:** Backend must allow frontend origin in CORS config
 
 ### Issue: Cold start timeouts
+
 **Solution:** API client automatically retries (60s timeout)
 
 ### Issue: Charts not rendering
+
 **Solution:** Ensure Recharts is installed and data format matches expected types
 
 ## Browser Support
@@ -329,4 +371,4 @@ vercel
 
 **Built with ❤️ for the AI ATL Hackathon**
 
-*Transforming complex RAG metrics into actionable insights.*
+_Transforming complex RAG metrics into actionable insights._
