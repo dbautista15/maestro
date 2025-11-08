@@ -1,0 +1,22 @@
+# API Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# Caching
+langcache==0.1.0
+
+# Google AI
+google-generativeai==0.3.1
+
+# Embeddings
+sentence-transformers==2.2.2
+
+# Data Processing
+numpy==1.24.3
+scipy==1.11.3
+
+# Environment & Config
+python-dotenv==1.0.0
+
+# Utilities
+python-multipart==0.0.6
