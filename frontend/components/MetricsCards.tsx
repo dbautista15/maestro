@@ -1,6 +1,6 @@
 'use client';
 
-import { TrendingUp, TrendingDown, DollarSign, Zap, Target, Database } from 'lucide-react';
+import { TrendingDown, TrendingUp, DollarSign, Zap, Database, Clock, Target } from 'lucide-react';
 
 interface MetricsCardsProps {
   metrics: {
@@ -11,99 +11,73 @@ interface MetricsCardsProps {
     costSaved: number;
     avgLatency: number;
   };
-  view: 'performance' | 'reliability';
 }
 
-export default function MetricsCards({ metrics, view }: MetricsCardsProps) {
+export default function MetricsCards({ metrics }: MetricsCardsProps) {
   // Format numbers
-  const formatCost = (totalCost: number ) => `$${totalCost.toFixed(4)}`;
-  const formatPercent = (cacheHitRate: number) => `${(cacheHitRate * 100).toFixed(1)}%`;
+  const formatCost = (cost: number) => `$${cost.toFixed(4)}`;
+  const formatPercent = (rate: number) => `${(rate * 100).toFixed(1)}%`;
   const formatMs = (ms: number) => `${Math.round(ms)}ms`;
 
-  // Different metrics for different views
-  if (view === 'performance') {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Queries */}
-        <MetricCard
-          title="Total Queries"
-          value={(metrics.totalQueries ?? 0).toString()}
-          icon={<Database size={24} />}
-          color="gray"
-        />
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Total Queries */}
+      <MetricCard
+        title="Total Queries"
+        value={(metrics.totalQueries ?? 0).toString()}
+        icon={<Database size={24} />}
+        color="gray"
+      />
 
-        {/* Cache Hit Rate */}
-        <MetricCard
-          title="Cache Hit Rate"
-          value={formatPercent(metrics.cacheHitRate ?? 0)}
-          subtitle={metrics.cacheHitRate > 0.5 ? "Excellent" : "Building cache..."}
-          icon={<Zap size={24} />}
-          color="green"
-          trend={metrics.cacheHitRate > 0.5 ? 'up' : undefined}
-        />
+      {/* Cache Hit Rate */}
+      <MetricCard
+        title="Cache Hit Rate"
+        value={formatPercent(metrics.cacheHitRate ?? 0)}
+        subtitle={metrics.cacheHitRate > 0.5 ? "Excellent" : "Building cache..."}
+        icon={<Zap size={24} />}
+        color="green"
+        trend={metrics.cacheHitRate > 0.5 ? 'up' : undefined}
+      />
 
-        {/* Avg Cost */}
-        <MetricCard
-          title="Avg Cost/Query"
-          value={formatCost(metrics.avgCost ?? 0)}
-          subtitle="vs $0.018 naive"
-          icon={<DollarSign size={24} />}
-          color="blue"
-          trend={metrics.avgCost < 0.010 ? 'down' : undefined}
-        />
+      {/* Avg Cost */}
+      <MetricCard
+        title="Avg Cost/Query"
+        value={formatCost(metrics.avgCost ?? 0)}
+        subtitle="vs $0.018 naive"
+        icon={<DollarSign size={24} />}
+        color="blue"
+        trend={metrics.avgCost < 0.010 ? 'down' : undefined}
+      />
 
-        {/* Total Saved */}
-        <MetricCard
-          title="Total Saved"
-          value={formatCost(metrics.costSaved ?? 0)}
-          subtitle={`${((metrics.costSaved / (metrics.totalCost + metrics.costSaved)) * 100).toFixed(0)}% reduction`}
-          icon={<TrendingDown size={24} />}
-          color="purple"
-          trend="down"
-        />
-      </div>
-    );
-  } else {
-    // Reliability view
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Queries */}
-        <MetricCard
-          title="Total Queries"
-          value={(metrics.totalQueries ?? 0).toString()}
-          icon={<Database size={24} />}
-          color="gray"
-        />
+      {/* Total Saved */}
+      <MetricCard
+        title="Total Saved"
+        value={formatCost(metrics.costSaved ?? 0)}
+        subtitle={`${((metrics.costSaved / (metrics.totalCost + metrics.costSaved)) * 100).toFixed(0)}% reduction`}
+        icon={<TrendingDown size={24} />}
+        color="purple"
+        trend="down"
+      />
 
-        {/* Consistency Rate (cache hit rate in disguise) */}
-        <MetricCard
-          title="Consistency Rate"
-          value={formatPercent(metrics.cacheHitRate ?? 0)}
-          subtitle="Same query → same answer"
-          icon={<Target size={24} />}
-          color="green"
-        />
+      {/* Avg Response Time */}
+      <MetricCard
+        title="Avg Response Time"
+        value={formatMs(metrics.avgLatency ?? 0)}
+        subtitle="P50 latency"
+        icon={<Clock size={24} />}
+        color="blue"
+      />
 
-        {/* Avg Response Time */}
-        <MetricCard
-          title="Avg Response Time"
-          value={formatMs(metrics.avgLatency ?? 0)}
-          subtitle="P50 latency"
-          icon={<Zap size={24} />}
-          color="blue"
-        />
-
-        {/* Audit Coverage */}
-        <MetricCard
-          title="Audit Coverage"
-          value="100%"
-          subtitle="Full provenance tracking"
-          icon={<TrendingUp size={24} />}
-          color="purple"
-        />
-      </div>
-    );
-  }
+      {/* Audit Coverage */}
+      <MetricCard
+        title="Audit Coverage"
+        value="100%"
+        subtitle="Full provenance tracking"
+        icon={<Target size={24} />}
+        color="green"
+      />
+    </div>
+  );
 }
 
 interface MetricCardProps {

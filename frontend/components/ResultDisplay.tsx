@@ -5,10 +5,9 @@ import type { QueryResponse } from '@/lib/api';
 
 interface ResultDisplayProps {
   result: QueryResponse | null;
-  view: 'performance' | 'reliability';
 }
 
-export default function ResultDisplay({ result, view }: ResultDisplayProps) {
+export default function ResultDisplay({ result }: ResultDisplayProps) {
   if (!result) {
     return (
       <div className="w-full max-w-4xl mx-auto p-8 bg-gray-50 rounded-lg text-center text-gray-500">
@@ -71,16 +70,16 @@ export default function ResultDisplay({ result, view }: ResultDisplayProps) {
           ) : (
             <AlertCircle className="text-yellow-600" size={20} />
           )}
-          {view === 'performance' ? 'Response' : 'Verified Answer'}
+          Response
         </h3>
         <p className="text-gray-700 leading-relaxed">{result.answer}</p>
       </div>
 
-      {/* Documents (show in reliability view or always) */}
-      {(view === 'reliability' || result.documents.length > 0) && (
+      {/* Documents */}
+      {result.documents.length > 0 && (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold mb-4">
-            {view === 'performance' ? 'Retrieved Documents' : 'Source Documents (Provenance)'}
+            Source Documents
           </h3>
           <div className="space-y-3">
             {result.documents.map((doc, idx) => (

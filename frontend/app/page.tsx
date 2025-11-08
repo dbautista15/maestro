@@ -4,14 +4,12 @@ import { useState, useEffect } from 'react';
 import QueryInput from '@/components/QueryInput';
 import MetricsCards from '@/components/MetricsCards';
 import ResultDisplay from '@/components/ResultDisplay';
-import ViewToggle from '@/components/ViewToggle';
 import AuditTrail from '@/components/AuditTrail';
 import { queryAPI, type QueryResponse, type Metrics, type RecentQuery } from '@/lib/api';
 import { AlertCircle } from 'lucide-react';
 
 export default function Dashboard() {
   // State
-  const [view, setView] = useState<'performance' | 'reliability'>('performance');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<QueryResponse | null>(null);
   const [metrics, setMetrics] = useState<Metrics | null>(null);
@@ -78,19 +76,11 @@ export default function Dashboard() {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                {view === 'performance' ? 'Maestro' : 'Maestro'}
-              </h1>
-              <p className="text-gray-600 mt-1">
-                {view === 'performance' 
-                  ? 'Enterprise RAG Infrastructure That Ships'
-                  : 'Production-Grade Reliability Framework'
-                }
-              </p>
-            </div>
-            <ViewToggle currentView={view} onToggle={setView} />
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Maestro</h1>
+            <p className="text-gray-600 mt-1">
+              Enterprise RAG Orchestration Platform
+            </p>
           </div>
         </div>
       </header>
@@ -99,7 +89,7 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
         {/* Metrics cards */}
         {metrics && (
-          <MetricsCards metrics={metrics} view={view} />
+          <MetricsCards metrics={metrics} />
         )}
 
         {/* Query input */}
@@ -119,7 +109,7 @@ export default function Dashboard() {
         )}
 
         {/* Result display */}
-        <ResultDisplay result={result} view={view} />
+        <ResultDisplay result={result} />
 
         {/* Audit trail */}
         {recentQueries.length > 0 && (
@@ -131,8 +121,7 @@ export default function Dashboard() {
       <footer className="bg-white border-t border-gray-200 mt-16">
         <div className="max-w-7xl mx-auto px-6 py-6 text-center text-sm text-gray-500">
           <p>
-            Built for {view === 'performance' ? 'Google Track' : 'Reliability Track'} • 
-            Powered by Gemini & Vertex AI
+            Built for AI ATL Hackathon • Powered by Gemini & Vertex AI
           </p>
         </div>
       </footer>
