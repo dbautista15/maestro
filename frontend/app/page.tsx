@@ -72,10 +72,10 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-full mx-auto px-6 py-6">
+      <header className="bg-white shadow-sm border-b border-gray-200 flex-shrink-0">
+        <div className="max-w-full mx-auto px-6 py-2">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
               Maestr
@@ -90,10 +90,10 @@ export default function Dashboard() {
       </header>
 
       {/* Main content */}
-      <main className="max-w-full mx-auto px-6 py-8">
+      <main className="flex-1 overflow-auto max-w-full mx-auto px-6 py-8 min-h-0">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Interactions */}
-          <div className="lg:col-span-1 space-y-8">
+          <div className="lg:col-span-1 space-y-8 flex flex-col h-full">
             {/* Result display */}
             <ResultDisplay result={result} />
 
@@ -120,7 +120,7 @@ export default function Dashboard() {
           </div>
 
           {/* Right Column - Metrics */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 h-full">
             <div className="lg:sticky lg:top-8">
               {metrics && (
                 <MetricsCards metrics={metrics} />
@@ -131,8 +131,8 @@ export default function Dashboard() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-16">
-        <div className="max-w-full mx-auto px-6 py-6 text-center text-sm text-gray-500">
+      <footer className="bg-white border-t border-gray-200 flex-shrink-0">
+        <div className="max-w-full mx-auto px-6 py-2 text-center text-sm text-gray-500">
           <p>
             Built for AI ATL Hackathon • Powered by Gemini & Vertex AI
           </p>
