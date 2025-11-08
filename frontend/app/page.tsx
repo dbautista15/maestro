@@ -90,6 +90,9 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Interactions */}
           <div className="lg:col-span-1 space-y-8">
+            {/* Result display */}
+            <ResultDisplay result={result} />
+
             {/* Query input */}
             <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
               <QueryInput onSubmit={handleQuery} loading={loading} />
@@ -105,9 +108,6 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
-
-            {/* Result display */}
-            <ResultDisplay result={result} />
 
             {/* Audit trail */}
             {recentQueries.length > 0 && (
