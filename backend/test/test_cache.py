@@ -44,7 +44,8 @@ class TestSemanticCache:
 
         # Set cache
         cache.set(
-            query=query, answer=answer, documents=documents, confidence=0.95, cost=0.01
+            query=query, answer=answer, documents=documents, confidence=0.95, cost=0.01,
+            strategy="fast", complexity="simple"
         )
 
         # Get from cache
@@ -66,7 +67,8 @@ class TestSemanticCache:
 
         # Cache first query
         cache.set(
-            query=query1, answer=answer, documents=documents, confidence=0.95, cost=0.01
+            query=query1, answer=answer, documents=documents, confidence=0.95, cost=0.01,
+            strategy="fast", complexity="simple"
         )
 
         # Query with similar but different text
@@ -86,7 +88,8 @@ class TestSemanticCache:
         documents = [{"id": "doc_001", "title": "Refund Policy"}]
 
         cache.set(
-            query=query1, answer=answer, documents=documents, confidence=0.95, cost=0.01
+            query=query1, answer=answer, documents=documents, confidence=0.95, cost=0.01,
+            strategy="fast", complexity="simple"
         )
 
         result = cache.get(query2)
@@ -102,7 +105,8 @@ class TestSemanticCache:
 
         # Try to cache with low confidence (< 0.85)
         cache.set(
-            query=query, answer=answer, documents=documents, confidence=0.75, cost=0.01
+            query=query, answer=answer, documents=documents, confidence=0.75, cost=0.01,
+            strategy="fast", complexity="simple"
         )
 
         # Should not be in cache
@@ -125,6 +129,8 @@ class TestSemanticCache:
             documents=documents,
             confidence=0.95,
             cost=0.01,
+            strategy="fast",
+            complexity="simple",
             ttl=1,
         )
 
@@ -153,7 +159,8 @@ class TestSemanticCache:
 
         for query, answer in queries:
             cache.set(
-                query=query, answer=answer, documents=[], confidence=0.95, cost=0.01
+                query=query, answer=answer, documents=[], confidence=0.95, cost=0.01,
+                strategy="fast", complexity="simple"
             )
 
         # Cache should only have 3 entries (LRU evicted oldest)
@@ -171,7 +178,8 @@ class TestSemanticCache:
         """Test that hit count increments on cache hits"""
         query = "What is your refund policy?"
         cache.set(
-            query=query, answer="30 days", documents=[], confidence=0.95, cost=0.01
+            query=query, answer="30 days", documents=[], confidence=0.95, cost=0.01,
+            strategy="fast", complexity="simple"
         )
 
         # Access cache multiple times
@@ -188,7 +196,8 @@ class TestSemanticCache:
         assert cache.stats["cache_misses"] == 0
 
         # Perform queries with distinct strings that won't accidentally match
-        cache.set(query="refund policy question", answer="a1", documents=[], confidence=0.95, cost=0.01)
+        cache.set(query="refund policy question", answer="a1", documents=[], confidence=0.95, cost=0.01,
+                  strategy="fast", complexity="simple")
         cache.get("refund policy question")  # hit
         cache.get("completely unrelated API documentation query")  # miss
         cache.get("refund policy question")  # hit again
@@ -201,7 +210,8 @@ class TestSemanticCache:
 
     def test_cache_clear(self, cache):
         """Test cache.clear() resets everything"""
-        cache.set(query="q1", answer="a1", documents=[], confidence=0.95, cost=0.01)
+        cache.set(query="q1", answer="a1", documents=[], confidence=0.95, cost=0.01,
+                  strategy="fast", complexity="simple")
         cache.get("q1")
 
         # Stats should have data
@@ -226,7 +236,8 @@ class TestSemanticCache:
         answer = "Our platform offers X, Y, Z"
 
         cache.set(
-            query=query, answer=answer, documents=documents, confidence=0.92, cost=0.01
+            query=query, answer=answer, documents=documents, confidence=0.92, cost=0.01,
+            strategy="fast", complexity="simple"
         )
         result = cache.get(query)
 
@@ -238,7 +249,8 @@ class TestSemanticCache:
         """Test that cache requires similarity above threshold"""
         query1 = "What is your refund policy?"
         cache.set(
-            query=query1, answer="30 days", documents=[], confidence=0.95, cost=0.01
+            query=query1, answer="30 days", documents=[], confidence=0.95, cost=0.01,
+            strategy="fast", complexity="simple"
         )
 
         # Very different query - should not hit even with low threshold
@@ -249,7 +261,8 @@ class TestSemanticCache:
         """Test that embeddings are consistent across calls"""
         query = "What is your refund policy?"
         cache.set(
-            query=query, answer="30 days", documents=[], confidence=0.95, cost=0.01
+            query=query, answer="30 days", documents=[], confidence=0.95, cost=0.01,
+            strategy="fast", complexity="simple"
         )
 
         # Get entry
