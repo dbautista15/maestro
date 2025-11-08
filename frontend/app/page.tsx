@@ -4,28 +4,32 @@ import { useState, useEffect } from 'react';
 import QueryInput from '@/components/QueryInput';
 import MetricsCards from '@/components/MetricsCards';
 import ResultDisplay from '@/components/ResultDisplay';
-import ViewToggle from '@/components/ViewToggle';
 import AuditTrail from '@/components/AuditTrail';
-import { queryAPI, type QueryResponse, type Metrics, type RecentQuery } from '@/lib/api';
+import { queryAPI, type QueryResponse, type Metrics, type RecentQuery, type QueryTimeSeriesDataPoint, type CacheHitRateTimeSeriesDataPoint } from '@/lib/api';
 import { AlertCircle } from 'lucide-react';
 
 export default function Dashboard() {
   // State
-  const [view, setView] = useState<'performance' | 'reliability'>('performance');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<QueryResponse | null>(null);
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [recentQueries, setRecentQueries] = useState<RecentQuery[]>([]);
+  const [queryTimeSeries, setQueryTimeSeries] = useState<QueryTimeSeriesDataPoint[]>([]);
+  const [cacheHitRateTimeSeries, setCacheHitRateTimeSeries] = useState<CacheHitRateTimeSeriesDataPoint[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch metrics on mount and every 5 seconds
   useEffect(() => {
     fetchMetrics();
     fetchRecentQueries();
+    fetchQueryTimeSeries();
+    fetchCacheHitRateTimeSeries();
 
     const interval = setInterval(() => {
       fetchMetrics();
       fetchRecentQueries();
+      fetchQueryTimeSeries();
+      fetchCacheHitRateTimeSeries();
     }, 5000); // Update every 5 seconds
 
     return () => clearInterval(interval);
@@ -42,10 +46,28 @@ export default function Dashboard() {
 
   const fetchRecentQueries = async () => {
     try {
-      const data = await queryAPI.getRecentQueries(10);
+      const data = await queryAPI.getRecentQueries(5);
       setRecentQueries(data);
     } catch (err) {
       console.error('Failed to fetch recent queries:', err);
+    }
+  };
+
+  const fetchQueryTimeSeries = async () => {
+    try {
+      const data = await queryAPI.getQueryTimeSeries(60, 20);
+      setQueryTimeSeries(data);
+    } catch (err) {
+      console.error('Failed to fetch query time series:', err);
+    }
+  };
+
+  const fetchCacheHitRateTimeSeries = async () => {
+    try {
+      const data = await queryAPI.getCacheHitRateTimeSeries(60, 20);
+      setCacheHitRateTimeSeries(data);
+    } catch (err) {
+      console.error('Failed to fetch cache hit rate time series:', err);
     }
   };
 
@@ -61,9 +83,11 @@ export default function Dashboard() {
 
       setResult(response);
       
-      // Refresh metrics and audit trail
+      // Refresh metrics, time series, and audit trail
       await fetchMetrics();
       await fetchRecentQueries();
+      await fetchQueryTimeSeries();
+      await fetchCacheHitRateTimeSeries();
 
     } catch (err: any) {
       console.error('Query failed:', err);
@@ -74,65 +98,73 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                {view === 'performance' ? 'Maestro' : 'Maestro'}
-              </h1>
-              <p className="text-gray-600 mt-1">
-                {view === 'performance' 
-                  ? 'Enterprise RAG Infrastructure That Ships'
-                  : 'Production-Grade Reliability Framework'
-                }
-              </p>
-            </div>
-            <ViewToggle currentView={view} onToggle={setView} />
+      <header className="bg-white shadow-sm border-b border-gray-200 flex-shrink-0">
+        <div className="max-w-full mx-auto px-6 py-2">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Maestr
+              <img 
+                src="/favicon.ico" 
+                alt="o" 
+                className="w-4.25 h-4.25 mx-0.25 inline-block"
+              />
+            </h1>
           </div>
         </div>
       </header>
 
       {/* Main content */}
-      <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-        {/* Metrics cards */}
-        {metrics && (
-          <MetricsCards metrics={metrics} view={view} />
-        )}
+      <main className="flex-1 overflow-auto w-full max-w-full px-4 py-4 min-h-0">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 min-h-full min-w-full">
+          {/* Left Column - Interactions */}
+          <div className="lg:col-span-1 space-y-2 flex flex-col h-full">
+            {/* Result display */}
+            <ResultDisplay result={result} />
 
-        {/* Query input */}
-        <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
-          <QueryInput onSubmit={handleQuery} loading={loading} />
-        </div>
+            {/* Query input */}
+            <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+              <QueryInput onSubmit={handleQuery} loading={loading} />
+            </div>
 
-        {/* Error display */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 p-4 rounded-lg flex items-start gap-3">
-            <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
-            <div>
-              <div className="font-medium text-red-900">Query Failed</div>
-              <div className="text-sm text-red-700 mt-1">{error}</div>
+            {/* Error display */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 p-4 rounded-lg flex items-start gap-3">
+                <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
+                <div>
+                  <div className="font-medium text-red-900">Query Failed</div>
+                  <div className="text-sm text-red-700 mt-1">{error}</div>
+                </div>
+              </div>
+            )}
+
+            {/* Audit trail */}
+            {recentQueries.length > 0 && (
+              <AuditTrail queries={recentQueries} />
+            )}
+          </div>
+
+          {/* Right Column - Metrics */}
+          <div className="lg:col-span-2 h-full">
+            <div className="lg:sticky lg:top-8">
+              {metrics && (
+                <MetricsCards 
+                  metrics={metrics} 
+                  queryTimeSeries={queryTimeSeries}
+                  cacheHitRateTimeSeries={cacheHitRateTimeSeries}
+                />
+              )}
             </div>
           </div>
-        )}
-
-        {/* Result display */}
-        <ResultDisplay result={result} view={view} />
-
-        {/* Audit trail */}
-        {recentQueries.length > 0 && (
-          <AuditTrail queries={recentQueries} />
-        )}
+        </div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-16">
-        <div className="max-w-7xl mx-auto px-6 py-6 text-center text-sm text-gray-500">
+      <footer className="bg-white border-t border-gray-200 flex-shrink-0">
+        <div className="max-w-full mx-auto px-6 py-2 text-center text-sm text-gray-500">
           <p>
-            Built for {view === 'performance' ? 'Google Track' : 'Reliability Track'} • 
-            Powered by Gemini & Vertex AI
+            Built for AI ATL Hackathon • Powered by Gemini & Vertex AI
           </p>
         </div>
       </footer>

@@ -114,6 +114,48 @@ async def get_recent_queries(limit: int = 10):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/api/metrics/timeseries/queries")
+async def get_query_timeseries(bucket_seconds: int = 60, num_buckets: int = 20):
+    """
+    Get time-series data for query volume.
+    
+    Returns time-bucketed query counts for trend visualization.
+    
+    Args:
+        bucket_seconds: Size of each time bucket in seconds (default: 60 = 1 minute)
+        num_buckets: Number of time buckets to return (default: 20)
+        
+    WHY: Frontend needs time-series data to visualize query volume trends
+    and identify usage patterns. This enables managers to see peak times
+    and plan capacity accordingly.
+    """
+    try:
+        return {"data": orchestrator.get_query_timeseries(bucket_seconds, num_buckets)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/metrics/timeseries/cache-hit-rate")
+async def get_cache_hit_rate_timeseries(bucket_seconds: int = 60, num_buckets: int = 20):
+    """
+    Get time-series data for cumulative cache hit rate.
+    
+    Returns cumulative cache hit rate up to each time point for trend visualization.
+    
+    Args:
+        bucket_seconds: Size of each time bucket in seconds (default: 60 = 1 minute)
+        num_buckets: Number of time buckets to return (default: 20)
+        
+    WHY: Frontend needs time-series data to show cache effectiveness over time.
+    Cumulative rate shows the overall trend and helps managers understand if
+    the cache is consistently improving query performance.
+    """
+    try:
+        return {"data": orchestrator.get_cache_hit_rate_timeseries(bucket_seconds, num_buckets)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/health")
 @app.head("/api/health")
 async def health_check():

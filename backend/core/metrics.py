@@ -116,3 +116,121 @@ class MetricsCollector:
         """Get recent queries for audit trail display"""
         recent = self.queries[-limit:]
         return [asdict(q) for q in reversed(recent)]
+
+    def get_query_timeseries(
+        self, bucket_seconds: int = 60, num_buckets: int = 20
+    ) -> List[Dict]:
+        """
+        Get time-series data for query volume.
+        
+        Buckets queries by time intervals for trend visualization.
+        
+        Args:
+            bucket_seconds: Size of each time bucket in seconds (default: 60 = 1 minute)
+            num_buckets: Number of time buckets to return (default: 20)
+            
+        Returns:
+            List of dicts with timestamp, queries count, and formatted time
+            
+        WHY: Frontend needs time-series data to show query volume trends.
+        This allows managers to see usage patterns and peak times.
+        """
+        if not self.queries:
+            return []
+        
+        # Get time range
+        now = time.time()
+        earliest_time = now - (bucket_seconds * num_buckets)
+        
+        # Create buckets
+        buckets = defaultdict(int)
+        
+        # Bucket each query by its timestamp
+        for query in self.queries:
+            if query.timestamp >= earliest_time:
+                # Calculate which bucket this query belongs to
+                bucket_index = int((query.timestamp - earliest_time) / bucket_seconds)
+                bucket_time = earliest_time + (bucket_index * bucket_seconds)
+                buckets[bucket_time] += 1
+        
+        # Build result with per-bucket counts
+        result = []
+        
+        for i in range(num_buckets):
+            bucket_time = earliest_time + (i * bucket_seconds)
+            count = buckets.get(bucket_time, 0)
+            
+            result.append({
+                "timestamp": int(bucket_time * 1000),  # Convert to milliseconds for JS
+                "queries": count,  # Queries in this time bucket
+            })
+        
+        return result
+
+    def get_cache_hit_rate_timeseries(
+        self, bucket_seconds: int = 60, num_buckets: int = 20
+    ) -> List[Dict]:
+        """
+        Get time-series data for cumulative cache hit rate.
+        
+        Calculates cumulative cache hit rate up to each time bucket.
+        Shows overall cache effectiveness from the start to each point in time.
+        
+        Args:
+            bucket_seconds: Size of each time bucket in seconds (default: 60 = 1 minute)
+            num_buckets: Number of time buckets to return (default: 20)
+            
+        Returns:
+            List of dicts with timestamp and cumulative cache hit rate (0.0 to 1.0)
+            
+        WHY: Frontend needs time-series data to show cache warming patterns
+        and effectiveness over time. Cumulative rate shows the overall trend
+        and helps managers understand if the cache is consistently improving.
+        """
+        if not self.queries:
+            return []
+        
+        # Get time range
+        now = time.time()
+        earliest_time = now - (bucket_seconds * num_buckets)
+        
+        # Create buckets to track total and cache hits
+        buckets = defaultdict(lambda: {"total": 0, "cache_hits": 0})
+        
+        # Bucket each query by its timestamp
+        for query in self.queries:
+            if query.timestamp >= earliest_time:
+                # Calculate which bucket this query belongs to
+                bucket_index = int((query.timestamp - earliest_time) / bucket_seconds)
+                bucket_time = earliest_time + (bucket_index * bucket_seconds)
+                
+                buckets[bucket_time]["total"] += 1
+                if query.source == "cache":
+                    buckets[bucket_time]["cache_hits"] += 1
+        
+        # Build result with cumulative cache hit rates
+        result = []
+        cumulative_total = 0
+        cumulative_cache_hits = 0
+        
+        for i in range(num_buckets):
+            bucket_time = earliest_time + (i * bucket_seconds)
+            bucket_data = buckets.get(bucket_time, {"total": 0, "cache_hits": 0})
+            
+            # Add this bucket's data to cumulative totals
+            cumulative_total += bucket_data["total"]
+            cumulative_cache_hits += bucket_data["cache_hits"]
+            
+            # Calculate cumulative hit rate (avoid division by zero)
+            if cumulative_total > 0:
+                hit_rate = cumulative_cache_hits / cumulative_total
+            else:
+                hit_rate = 0.0
+            
+            result.append({
+                "timestamp": int(bucket_time * 1000),  # Convert to milliseconds for JS
+                "hit_rate": hit_rate,  # Cumulative cache hit rate (0.0 to 1.0)
+                "total_queries": cumulative_total,  # For context
+            })
+        
+        return result

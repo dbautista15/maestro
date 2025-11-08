@@ -5,8 +5,8 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Maestro - Enterprise RAG Orchestration',
-  description: 'Production-ready RAG infrastructure with configurable reliability',
+  title: 'Maestro',
+  description: 'Enterprise RAG Orchestration Layer',
 };
 
 export default function RootLayout({
