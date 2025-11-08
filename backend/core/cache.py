@@ -7,7 +7,7 @@ import numpy as np
 import time
 from typing import Optional, Dict, Any
 from dataclasses import dataclass
-from sentence_transformers import SentenceTransformer
+from core.model_cache import model_cache
 
 
 @dataclass
@@ -57,7 +57,8 @@ class SemanticCache:
         self.max_size = max_size
 
         # Load embedding model (same as vector DB for consistency)
-        self.embedder = SentenceTransformer("all-MiniLM-L6-v2")
+        # Use cached model to avoid re-downloading on every restart
+        self.embedder = model_cache.get_embedder()
 
         # Metrics for dashboard
         self.stats = {"total_queries": 0, "cache_hits": 0, "cache_misses": 0}

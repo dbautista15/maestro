@@ -7,7 +7,7 @@ import numpy as np
 import json
 import time
 from typing import List, Dict
-from sentence_transformers import SentenceTransformer
+from core.model_cache import model_cache
 
 
 class MockVectorDB:
@@ -31,7 +31,8 @@ class MockVectorDB:
         self.embeddings = np.load(f"{data_path}/embeddings.npy")
 
         # Load embedding model (for query embedding)
-        self.embedder = SentenceTransformer("all-MiniLM-L6-v2")
+        # Use cached model to avoid duplicate downloads
+        self.embedder = model_cache.get_embedder()
 
         print(f" Loaded {len(self.documents)} documents")
 
@@ -47,8 +48,8 @@ class MockVectorDB:
             List of documents with similarity scores
         """
         # Simulate network latency (real vector DB has this)
-        # Remove this in production, but keeps demo realistic
-        time.sleep(0.05 + (top_k * 0.01))  # 50-150ms depending on k
+        # Disabled in production for performance
+        # time.sleep(0.05 + (top_k * 0.01))  # 50-150ms depending on k
 
         # Embed the query
         query_embedding = self.embedder.encode(query)
