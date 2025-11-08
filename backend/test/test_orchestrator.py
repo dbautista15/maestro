@@ -89,6 +89,8 @@ class TestMaestroOrchestrator:
             documents=[{"id": "doc_001", "title": "Refund"}],
             confidence=0.95,
             cost=0.01,
+            strategy="fast",
+            complexity="simple",
         )
 
         # Process query
@@ -112,6 +114,8 @@ class TestMaestroOrchestrator:
             documents=[],
             confidence=0.95,
             cost=0.01,
+            strategy="fast",
+            complexity="simple",
         )
 
         # Process query with cache disabled
@@ -131,6 +135,8 @@ class TestMaestroOrchestrator:
             documents=[],
             confidence=0.95,
             cost=0.01,
+            strategy="fast",
+            complexity="simple",
         )
 
         # Process with cache disabled in user config

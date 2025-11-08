@@ -66,7 +66,29 @@ export const queryAPI = {
    */
   async process(request: QueryRequest): Promise<QueryResponse> {
     const response = await api.post('/api/query', request);
-    return response.data;
+    const data = response.data;
+
+    // Transform snake_case to camelCase
+    return {
+      answer: data.answer,
+      documents: data.documents.map((doc: any) => ({
+        id: doc.id,
+        title: doc.title,
+        category: doc.category,
+        similarityScore: doc.similarity_score ?? doc.similarityScore,
+        contentPreview: doc.content_preview ?? doc.contentPreview,
+      })),
+      confidence: data.confidence,
+      cost: data.cost,
+      latency: data.latency_ms ?? data.latency, // Backend sends latency_ms
+      source: data.source,
+      strategy: data.strategy,
+      complexity: data.complexity,
+      numDocumentsRetrieved: data.num_documents_retrieved ?? data.numDocumentsRetrieved,
+      cacheSimilarity: data.cache_similarity ?? data.cacheSimilarity,
+      originalQuery: data.original_query ?? data.originalQuery,
+      hitCount: data.hit_count ?? data.hitCount,
+    };
   },
 
   /**
@@ -74,7 +96,19 @@ export const queryAPI = {
    */
   async getMetrics(): Promise<Metrics> {
     const response = await api.get('/api/metrics');
-    return response.data;
+    const data = response.data;
+
+    // Transform snake_case to camelCase
+    return {
+      totalQueries: data.total_queries ?? data.totalQueries ?? 0,
+      cacheHitRate: data.cache_hit_rate ?? data.cacheHitRate ?? 0,
+      avgCost: data.avg_cost ?? data.avgCost ?? 0,
+      avgLatency: data.avg_latency_ms ?? data.avgLatency ?? 0, // Backend sends avg_latency_ms
+      totalCost: data.total_cost ?? data.totalCost ?? 0,
+      costSaved: data.cost_saved ?? data.costSaved ?? 0,
+      breakdownByStrategy: data.breakdown_by_strategy ?? data.breakdownByStrategy,
+      cacheSize: data.cache_size ?? data.cacheSize,
+    };
   },
 
   /**
@@ -82,7 +116,18 @@ export const queryAPI = {
    */
   async getRecentQueries(limit: number = 10): Promise<RecentQuery[]> {
     const response = await api.get(`/api/recent-queries?limit=${limit}`);
-    return response.data.queries;
+    const queries = response.data.queries;
+
+    // Transform snake_case to camelCase
+    return queries.map((q: any) => ({
+      timestamp: q.timestamp,
+      query: q.query,
+      source: q.source,
+      strategy: q.strategy,
+      latency: q.latency_ms ?? q.latency, // Backend sends latency_ms
+      cost: q.cost,
+      confidence: q.confidence,
+    }));
   },
 
   /**

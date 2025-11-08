@@ -26,6 +26,8 @@ class CacheEntry:
     confidence: float
     cost: float
     cached_at: float
+    strategy: str  # Strategy used for original query
+    complexity: str  # Complexity classification of original query
     hit_count: int = 0
     ttl: int = 3600  # 1 hour default
 
@@ -106,6 +108,8 @@ class SemanticCache:
                 "cost": 0.0001,  # Cache access is ~free
                 "latency_ms": 5.0,  # Sub-10ms cache lookup
                 "source": "CACHE",
+                "strategy": best_match.strategy,
+                "complexity": best_match.complexity,
                 "cache_similarity": float(best_similarity),
                 "original_query": best_match.query,
                 "hit_count": best_match.hit_count,
@@ -122,6 +126,8 @@ class SemanticCache:
         documents: list,
         confidence: float,
         cost: float,
+        strategy: str,
+        complexity: str,
         ttl: int = 3600,
     ):
         """
@@ -152,6 +158,8 @@ class SemanticCache:
             confidence=confidence,
             cost=cost,
             cached_at=time.time(),
+            strategy=strategy,
+            complexity=complexity,
             ttl=ttl,
         )
 

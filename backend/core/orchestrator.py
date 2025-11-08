@@ -160,6 +160,8 @@ class MaestroOrchestrator:
                 documents=result["documents"],
                 confidence=confidence,
                 cost=strategy.estimated_cost,
+                strategy=strategy.name,
+                complexity=complexity,
             )
 
         # STEP 11: Log metrics
