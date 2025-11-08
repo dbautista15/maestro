@@ -57,6 +57,7 @@ class QueryResponse(BaseModel):
     source: str  # 'CACHE' or 'RETRIEVAL'
     strategy: str
     complexity: str
+    context_relevance: float  # Average document-query similarity
 
 
 # API Endpoints
@@ -228,6 +229,30 @@ async def get_cumulative_cost_timeseries(bucket_seconds: int = 60, num_buckets: 
     """
     try:
         return {"data": orchestrator.get_cumulative_cost_timeseries(bucket_seconds, num_buckets)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/metrics/timeseries/context-relevance")
+async def get_context_relevance_timeseries(bucket_seconds: int = 60, num_buckets: int = 20):
+    """
+    Get time-series data for cumulative average context relevance.
+    
+    Returns cumulative average context relevance (document-query similarity scores)
+    up to each time point. This metric validates that semantic caching maintains
+    response quality when reusing documents from similar queries.
+    
+    Args:
+        bucket_seconds: Size of each time bucket in seconds (default: 60 = 1 minute)
+        num_buckets: Number of time buckets to return (default: 20)
+        
+    WHY: Context relevance is the key quality metric for validating the semantic
+    caching strategy. High relevance scores for cached results prove that the system
+    successfully reuses documents without degrading response quality. This time-series
+    allows managers to monitor quality trends and catch any degradation early.
+    """
+    try:
+        return {"data": orchestrator.get_context_relevance_timeseries(bucket_seconds, num_buckets)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

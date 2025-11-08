@@ -21,6 +21,7 @@ class QueryMetric:
     cost: float
     confidence: float
     num_documents: int
+    context_relevance: float  # Average similarity score of retrieved documents
 
 
 class MetricsCollector:
@@ -46,6 +47,7 @@ class MetricsCollector:
         cost: float,
         confidence: float,
         num_documents: int,
+        context_relevance: float,
     ):
         """Log individual query execution"""
         metric = QueryMetric(
@@ -57,6 +59,7 @@ class MetricsCollector:
             cost=cost,
             confidence=confidence,
             num_documents=num_documents,
+            context_relevance=context_relevance,
         )
 
         self.queries.append(metric)
@@ -83,12 +86,14 @@ class MetricsCollector:
                 "avg_latency_ms": 0.0,
                 "total_cost": 0.0,
                 "cost_saved": 0.0,
+                "avg_context_relevance": 0.0,
             }
 
         # Calculate metrics
         cache_queries = self.aggregated["cache"]["count"]
         total_cost = sum(q.cost for q in self.queries)
         total_latency = sum(q.latency_ms for q in self.queries)
+        total_context_relevance = sum(q.context_relevance for q in self.queries)
 
         # Estimate savings (compare to naive RAG)
         naive_cost_per_query = 0.018  # Assume always comprehensive
@@ -102,6 +107,7 @@ class MetricsCollector:
             "avg_latency_ms": total_latency / total_queries,
             "total_cost": total_cost,
             "cost_saved": max(0, cost_saved),
+            "avg_context_relevance": total_context_relevance / total_queries,
             "breakdown_by_strategy": self._get_strategy_breakdown(),
         }
 
@@ -441,6 +447,76 @@ class MetricsCollector:
                 "naive_cost": cumulative_naive_cost,  # Theoretical cost (no caching/routing)
                 "actual_cost": cumulative_actual_cost,  # Real cost incurred
                 "saved": max(0.0, savings),  # Total savings (never negative)
+                "query_count": cumulative_query_count,  # For context
+            })
+        
+        return result
+
+    def get_context_relevance_timeseries(
+        self, bucket_seconds: int = 60, num_buckets: int = 20
+    ) -> List[Dict]:
+        """
+        Get time-series data for cumulative average context relevance.
+        
+        Calculates cumulative average context relevance (document similarity scores)
+        up to each time bucket. This metric shows how well retrieved documents match
+        user queries over time, which is critical for validating that semantic caching
+        maintains response quality.
+        
+        Args:
+            bucket_seconds: Size of each time bucket in seconds (default: 60 = 1 minute)
+            num_buckets: Number of time buckets to return (default: 20)
+            
+        Returns:
+            List of dicts with timestamp and cumulative average context relevance (0.0 to 1.0)
+            
+        WHY: Context relevance is crucial for validating that reusing cached documents
+        from similar queries maintains response quality. This time-series shows whether
+        document relevance degrades over time or remains consistent, helping managers
+        understand if the semantic caching strategy is working effectively.
+        """
+        if not self.queries:
+            return []
+        
+        # Get time range
+        now = time.time()
+        earliest_time = now - (bucket_seconds * num_buckets)
+        
+        # Create buckets to track total relevance and query count
+        buckets = defaultdict(lambda: {"total_relevance": 0.0, "query_count": 0})
+        
+        # Bucket each query by its timestamp
+        for query in self.queries:
+            if query.timestamp >= earliest_time:
+                # Calculate which bucket this query belongs to
+                bucket_index = int((query.timestamp - earliest_time) / bucket_seconds)
+                bucket_time = earliest_time + (bucket_index * bucket_seconds)
+                
+                buckets[bucket_time]["total_relevance"] += query.context_relevance
+                buckets[bucket_time]["query_count"] += 1
+        
+        # Build result with cumulative average context relevance
+        result = []
+        cumulative_total_relevance = 0.0
+        cumulative_query_count = 0
+        
+        for i in range(num_buckets):
+            bucket_time = earliest_time + (i * bucket_seconds)
+            bucket_data = buckets.get(bucket_time, {"total_relevance": 0.0, "query_count": 0})
+            
+            # Add this bucket's data to cumulative totals
+            cumulative_total_relevance += bucket_data["total_relevance"]
+            cumulative_query_count += bucket_data["query_count"]
+            
+            # Calculate cumulative average context relevance (avoid division by zero)
+            if cumulative_query_count > 0:
+                avg_relevance = cumulative_total_relevance / cumulative_query_count
+            else:
+                avg_relevance = 0.0
+            
+            result.append({
+                "timestamp": int(bucket_time * 1000),  # Convert to milliseconds for JS
+                "avg_relevance": avg_relevance,  # Cumulative average context relevance (0.0 to 1.0)
                 "query_count": cumulative_query_count,  # For context
             })
         

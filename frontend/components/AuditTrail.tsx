@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Database, Clock, DollarSign, Zap, ChevronDown } from 'lucide-react';
+import { Database, Clock, DollarSign, Zap, ChevronDown, FileCheck } from 'lucide-react';
 import type { RecentQuery } from '@/lib/api';
 
 interface AuditTrailProps {
@@ -69,6 +69,10 @@ export default function AuditTrail({ queries }: AuditTrailProps) {
                     <span className="flex items-center gap-1 text-xs">
                       <Zap size={14} />
                       {(query.confidence * 100).toFixed(0)}%
+                    </span>
+                    <span className="flex items-center gap-1 text-xs">
+                      <FileCheck size={14} />
+                      {(query.contextRelevance * 100).toFixed(0)}%
                     </span>
                   </div>
                 </div>

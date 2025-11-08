@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { TrendingDown, TrendingUp, DollarSign, Zap, Database, Clock, Target, ChevronDown, ChevronUp } from 'lucide-react';
+import { TrendingDown, TrendingUp, DollarSign, Zap, Database, Clock, Target, ChevronDown, ChevronUp, FileCheck } from 'lucide-react';
 import { AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface QueryTimeSeriesDataPoint {
@@ -35,6 +35,12 @@ interface CumulativeCostTimeSeriesDataPoint {
   queryCount: number;
 }
 
+interface ContextRelevanceTimeSeriesDataPoint {
+  timestamp: number;
+  avgRelevance: number;
+  queryCount: number;
+}
+
 interface MetricsCardsProps {
   metrics: {
     totalQueries: number;
@@ -43,15 +49,17 @@ interface MetricsCardsProps {
     totalCost: number;
     costSaved: number;
     avgLatency: number;
+    avgContextRelevance: number;
   };
   queryTimeSeries?: QueryTimeSeriesDataPoint[];
   cacheHitRateTimeSeries?: CacheHitRateTimeSeriesDataPoint[];
   avgCostTimeSeries?: AvgCostTimeSeriesDataPoint[];
   avgLatencyTimeSeries?: AvgLatencyTimeSeriesDataPoint[];
   cumulativeCostTimeSeries?: CumulativeCostTimeSeriesDataPoint[];
+  contextRelevanceTimeSeries?: ContextRelevanceTimeSeriesDataPoint[];
 }
 
-export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRateTimeSeries = [], avgCostTimeSeries = [], avgLatencyTimeSeries = [], cumulativeCostTimeSeries = [] }: MetricsCardsProps) {
+export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRateTimeSeries = [], avgCostTimeSeries = [], avgLatencyTimeSeries = [], cumulativeCostTimeSeries = [], contextRelevanceTimeSeries = [] }: MetricsCardsProps) {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   // Format numbers
@@ -121,6 +129,19 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
       }),
     }));
   }, [cumulativeCostTimeSeries]);
+
+  // Use real time-series data from backend for context relevance
+  const contextRelevanceData = useMemo(() => {
+    return contextRelevanceTimeSeries.map(point => ({
+      timestamp: point.timestamp,
+      relevance: point.avgRelevance,
+      relevancePercent: point.avgRelevance * 100,
+      time: new Date(point.timestamp).toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }),
+    }));
+  }, [contextRelevanceTimeSeries]);
 
   const toggleCard = (cardId: string) => {
     setExpandedCard(expandedCard === cardId ? null : cardId);
@@ -235,6 +256,65 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
                </ResponsiveContainer>
                <p className="text-sm text-gray-600 mt-4">
                  Shows overall cache hit rate from the start of the time window. A rising trend indicates the cache is warming up and consistently improving query performance.
+               </p>
+             </div>
+           }
+        />
+      </div>
+
+      {/* Context Relevance - Expandable */}
+      <div className={`${expandedCard === 'context-relevance' ? 'md:col-span-2 lg:col-span-3' : ''}`}>
+        <ExpandableMetricCard
+          id="context-relevance"
+          title="Context Relevance"
+          value={formatPercent(metrics.avgContextRelevance ?? 0)}
+          subtitle={metrics.avgContextRelevance > 0.35 ? "High quality" : "Moderate"}
+          icon={<FileCheck size={24} />}
+          color="green"
+          trend={metrics.avgContextRelevance > 0.35 ? 'up' : undefined}
+          isExpanded={expandedCard === 'context-relevance'}
+          onToggle={toggleCard}
+           chart={
+             <div>
+               <h3 className="text-lg font-semibold mb-4 text-gray-700">Cumulative Context Relevance</h3>
+               <ResponsiveContainer width="100%" height={300}>
+                 <LineChart data={contextRelevanceData}>
+                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                   <XAxis 
+                     dataKey="time" 
+                     tick={{ fontSize: 12 }}
+                     stroke="#6b7280"
+                   />
+                   <YAxis 
+                     tick={{ fontSize: 12 }}
+                     stroke="#6b7280"
+                     domain={[0, 100]}
+                     tickFormatter={(val) => `${val.toFixed(0)}%`}
+                     label={{ value: 'Relevance (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+                   />
+                   <Tooltip 
+                     contentStyle={{ 
+                       backgroundColor: '#fff', 
+                       border: '1px solid #e5e7eb',
+                       borderRadius: '8px',
+                       padding: '8px'
+                     }}
+                     labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
+                     formatter={(value: number) => `${value.toFixed(1)}%`}
+                   />
+                   <Line 
+                     type="monotone" 
+                     dataKey="relevancePercent" 
+                     stroke="#10b981" 
+                     strokeWidth={2}
+                     dot={{ fill: '#10b981', r: 3 }}
+                     activeDot={{ r: 5 }}
+                     name="Relevance"
+                   />
+                 </LineChart>
+               </ResponsiveContainer>
+               <p className="text-sm text-gray-600 mt-4">
+                 Shows average document-query similarity score over time. This validates that semantic caching maintains response quality when reusing documents from similar queries. Higher values indicate better document relevance.
                </p>
              </div>
            }
