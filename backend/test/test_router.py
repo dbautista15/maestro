@@ -78,6 +78,9 @@ class TestQueryRouter:
 
     def test_classify_with_gemini_when_available(self, router):
         """Test that Gemini is used when available"""
+        # Enable Gemini for this test (normally disabled for performance)
+        router.gemini_available = True
+
         # Mock Gemini response
         mock_response = MagicMock()
         mock_response.text = "complex"
