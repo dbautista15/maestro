@@ -1,0 +1,72 @@
+[
+  {
+    "id": "doc_001",
+    "title": "Refund Policy 2024",
+    "content": "Our refund policy allows customers to return products within 30 days \n        of purchase for a full refund. Items must be in original condition with tags attached. \n        Refunds are processed within 5-7 business days to the original payment method.",
+    "category": "policy",
+    "last_updated": "2024-01-15"
+  },
+  {
+    "id": "doc_002",
+    "title": "Shipping Information",
+    "content": "We ship orders within 2-3 business days via FedEx or UPS. \n        Standard shipping takes 5-7 business days. Express shipping (2-3 days) is available \n        for an additional fee. International shipping is available to most countries.",
+    "category": "logistics",
+    "last_updated": "2024-02-01"
+  },
+  {
+    "id": "doc_003",
+    "title": "Enterprise Pricing Model",
+    "content": "Our enterprise pricing starts at $10,000 per year for up to 50 users. \n        Volume discounts are available for organizations with 100+ users. Enterprise plans \n        include priority support, dedicated account manager, and custom integrations. \n        We offer annual and multi-year contract options.",
+    "category": "pricing",
+    "last_updated": "2024-01-20"
+  },
+  {
+    "id": "doc_004",
+    "title": "Technical Support Guidelines",
+    "content": "Technical support is available 24/7 for enterprise customers. \n        Standard support hours are Monday-Friday 9am-5pm EST. Submit tickets via our \n        support portal or email support@company.com. Average response time is 4 hours \n        for critical issues, 24 hours for standard requests.",
+    "category": "support",
+    "last_updated": "2024-02-10"
+  },
+  {
+    "id": "doc_005",
+    "title": "Data Security and Compliance",
+    "content": "We are SOC 2 Type II certified and GDPR compliant. All data is \n        encrypted at rest and in transit using AES-256 and TLS 1.3. We conduct annual \n        penetration testing and maintain comprehensive audit logs. Customer data is \n        stored in geographically distributed data centers.",
+    "category": "security",
+    "last_updated": "2024-01-05"
+  },
+  {
+    "id": "doc_006",
+    "title": "Product Features Overview",
+    "content": "Our platform offers real-time collaboration, version control, \n        and advanced analytics. Key features include: automated workflows, customizable \n        dashboards, API access, role-based permissions, and integration with 50+ tools \n        including Slack, Salesforce, and Google Workspace.",
+    "category": "product",
+    "last_updated": "2024-02-15"
+  },
+  {
+    "id": "doc_007",
+    "title": "API Documentation",
+    "content": "Our REST API uses standard HTTP methods and returns JSON responses. \n        Authentication uses OAuth 2.0 or API keys. Rate limits are 1000 requests per hour \n        for standard plans, 10000 for enterprise. Complete API reference available at \n        docs.company.com/api. SDKs available for Python, JavaScript, and Java.",
+    "category": "technical",
+    "last_updated": "2024-01-25"
+  },
+  {
+    "id": "doc_008",
+    "title": "Onboarding Process",
+    "content": "New customer onboarding takes 2-4 weeks. Includes initial consultation, \n        data migration, team training, and configuration. Dedicated onboarding specialist \n        assigned to each enterprise customer. Training includes live sessions and \n        recorded materials. Post-launch support for 90 days.",
+    "category": "operations",
+    "last_updated": "2024-02-05"
+  },
+  {
+    "id": "doc_009",
+    "title": "Service Level Agreement (SLA)",
+    "content": "We guarantee 99.9% uptime for enterprise customers. Scheduled \n        maintenance windows are announced 7 days in advance. In case of outage, credits \n        are provided: 10% for 99.5-99.9% uptime, 25% for 99-99.5%, 50% for below 99%. \n        Real-time status available at status.company.com.",
+    "category": "legal",
+    "last_updated": "2024-01-10"
+  },
+  {
+    "id": "doc_010",
+    "title": "Integration Capabilities",
+    "content": "Native integrations with major CRM, ERP, and collaboration tools. \n        Zapier support for 1000+ apps. Webhook support for custom integrations. \n        Enterprise customers can request custom integrations as part of their contract. \n        Integration setup typically takes 1-3 days.",
+    "category": "technical",
+    "last_updated": "2024-02-20"
+  }
+]
