@@ -29,9 +29,9 @@ class OrchestratorConfig:
     enable_verification: bool = True
 
 
-class ScaleRAGOrchestrator:
+class MaestroOrchestrator:
     """
-    Main orchestration engine for ScaleRAG.
+    Main orchestration engine for Maestro.
 
     This is your product. Everything else is infrastructure.
 
@@ -52,7 +52,7 @@ class ScaleRAGOrchestrator:
         self.config = config or OrchestratorConfig()
 
         # Initialize components
-        print("Initializing ScaleRAG Orchestrator...")
+        print("Initializing Maestro Orchestrator...")
         self.cache = SemanticCache(similarity_threshold=self.config.cache_threshold)
         self.router = QueryRouter()
         self.metrics = MetricsCollector()
