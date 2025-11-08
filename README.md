@@ -112,3 +112,7 @@ Dashboard runs at: http://localhost:3000
 - Recharts (visualizations)
 
 ---
+
+## License
+
+MIT
