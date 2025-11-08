@@ -27,6 +27,14 @@ interface AvgLatencyTimeSeriesDataPoint {
   queryCount: number;
 }
 
+interface CumulativeCostTimeSeriesDataPoint {
+  timestamp: number;
+  naiveCost: number;
+  actualCost: number;
+  saved: number;
+  queryCount: number;
+}
+
 interface MetricsCardsProps {
   metrics: {
     totalQueries: number;
@@ -40,9 +48,10 @@ interface MetricsCardsProps {
   cacheHitRateTimeSeries?: CacheHitRateTimeSeriesDataPoint[];
   avgCostTimeSeries?: AvgCostTimeSeriesDataPoint[];
   avgLatencyTimeSeries?: AvgLatencyTimeSeriesDataPoint[];
+  cumulativeCostTimeSeries?: CumulativeCostTimeSeriesDataPoint[];
 }
 
-export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRateTimeSeries = [], avgCostTimeSeries = [], avgLatencyTimeSeries = [] }: MetricsCardsProps) {
+export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRateTimeSeries = [], avgCostTimeSeries = [], avgLatencyTimeSeries = [], cumulativeCostTimeSeries = [] }: MetricsCardsProps) {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   // Format numbers
@@ -99,41 +108,19 @@ export default function MetricsCards({ metrics, queryTimeSeries = [], cacheHitRa
     }));
   }, [avgLatencyTimeSeries]);
 
-  // Generate mock time-series data for Total Saved (cumulative costs)
-  // TODO: Replace with actual backend time-series data
+  // Use real time-series data from backend for cumulative cost comparison
   const cumulativeCostData = useMemo(() => {
-    const now = Date.now();
-    const dataPoints = 20;
-    const intervalMs = 60000; // 1 minute intervals
-    const naiveCostPerQuery = 0.018; // Naive RAG cost per query
-    
-    let cumulativeActual = 0;
-    let cumulativeNaive = 0;
-    
-    return Array.from({ length: dataPoints }, (_, i) => {
-      const timestamp = now - (dataPoints - i - 1) * intervalMs;
-      // Simulate queries happening over time
-      const queriesAtThisPoint = Math.floor((metrics.totalQueries * (i + 1)) / dataPoints);
-      
-      // Calculate cumulative costs
-      // Naive cost: all queries at full cost
-      cumulativeNaive = queriesAtThisPoint * naiveCostPerQuery;
-      
-      // Actual cost: proportional to current total cost
-      cumulativeActual = (metrics.totalCost * (i + 1)) / dataPoints;
-      
-      return {
-        timestamp,
-        naiveCost: cumulativeNaive,
-        actualCost: cumulativeActual,
-        saved: cumulativeNaive - cumulativeActual,
-        time: new Date(timestamp).toLocaleTimeString('en-US', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        }),
-      };
-    });
-  }, [metrics.totalQueries, metrics.totalCost]);
+    return cumulativeCostTimeSeries.map(point => ({
+      timestamp: point.timestamp,
+      naiveCost: point.naiveCost,
+      actualCost: point.actualCost,
+      saved: point.saved,
+      time: new Date(point.timestamp).toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }),
+    }));
+  }, [cumulativeCostTimeSeries]);
 
   const toggleCard = (cardId: string) => {
     setExpandedCard(expandedCard === cardId ? null : cardId);

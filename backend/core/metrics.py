@@ -370,3 +370,78 @@ class MetricsCollector:
             })
         
         return result
+
+    def get_cumulative_cost_timeseries(
+        self, bucket_seconds: int = 60, num_buckets: int = 20
+    ) -> List[Dict]:
+        """
+        Get time-series data for cumulative cost comparison (naive vs actual).
+        
+        Calculates two cumulative cost lines:
+        1. Naive cost: theoretical cost if all queries used full vector search
+        2. Actual cost: real costs incurred based on cache hits and routing
+        
+        The area between these lines represents total savings.
+        
+        Args:
+            bucket_seconds: Size of each time bucket in seconds (default: 60 = 1 minute)
+            num_buckets: Number of time buckets to return (default: 20)
+            
+        Returns:
+            List of dicts with timestamp, naive_cost, actual_cost, and savings
+            
+        WHY: Frontend needs time-series data to visualize cost savings over time.
+        This shows managers the concrete value of caching and smart routing by
+        comparing actual costs against a naive RAG baseline.
+        """
+        if not self.queries:
+            return []
+        
+        # Naive RAG cost per query (full vector search + embedding)
+        NAIVE_COST_PER_QUERY = 0.018
+        
+        # Get time range
+        now = time.time()
+        earliest_time = now - (bucket_seconds * num_buckets)
+        
+        # Create buckets to track actual costs and query counts
+        buckets = defaultdict(lambda: {"actual_cost": 0.0, "query_count": 0})
+        
+        # Bucket each query by its timestamp
+        for query in self.queries:
+            if query.timestamp >= earliest_time:
+                # Calculate which bucket this query belongs to
+                bucket_index = int((query.timestamp - earliest_time) / bucket_seconds)
+                bucket_time = earliest_time + (bucket_index * bucket_seconds)
+                
+                buckets[bucket_time]["actual_cost"] += query.cost
+                buckets[bucket_time]["query_count"] += 1
+        
+        # Build result with cumulative costs
+        result = []
+        cumulative_actual_cost = 0.0
+        cumulative_query_count = 0
+        
+        for i in range(num_buckets):
+            bucket_time = earliest_time + (i * bucket_seconds)
+            bucket_data = buckets.get(bucket_time, {"actual_cost": 0.0, "query_count": 0})
+            
+            # Add this bucket's data to cumulative totals
+            cumulative_actual_cost += bucket_data["actual_cost"]
+            cumulative_query_count += bucket_data["query_count"]
+            
+            # Calculate cumulative naive cost (all queries at full cost)
+            cumulative_naive_cost = cumulative_query_count * NAIVE_COST_PER_QUERY
+            
+            # Calculate savings
+            savings = cumulative_naive_cost - cumulative_actual_cost
+            
+            result.append({
+                "timestamp": int(bucket_time * 1000),  # Convert to milliseconds for JS
+                "naive_cost": cumulative_naive_cost,  # Theoretical cost (no caching/routing)
+                "actual_cost": cumulative_actual_cost,  # Real cost incurred
+                "saved": max(0.0, savings),  # Total savings (never negative)
+                "query_count": cumulative_query_count,  # For context
+            })
+        
+        return result

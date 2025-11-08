@@ -200,6 +200,31 @@ async def get_avg_latency_timeseries(bucket_seconds: int = 60, num_buckets: int 
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/api/metrics/timeseries/cumulative-cost")
+async def get_cumulative_cost_timeseries(bucket_seconds: int = 60, num_buckets: int = 20):
+    """
+    Get time-series data for cumulative cost comparison (naive vs actual).
+    
+    Returns two cumulative cost lines:
+    1. Naive cost: theoretical cost if all queries used full vector search
+    2. Actual cost: real costs incurred based on cache hits and routing
+    
+    The area between these lines represents total savings.
+    
+    Args:
+        bucket_seconds: Size of each time bucket in seconds (default: 60 = 1 minute)
+        num_buckets: Number of time buckets to return (default: 20)
+        
+    WHY: Frontend needs time-series data to visualize cost savings over time.
+    This demonstrates the concrete ROI of caching and smart routing by comparing
+    actual costs against a naive RAG baseline.
+    """
+    try:
+        return {"data": orchestrator.get_cumulative_cost_timeseries(bucket_seconds, num_buckets)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/health")
 @app.head("/api/health")
 async def health_check():

@@ -83,6 +83,14 @@ export interface AvgLatencyTimeSeriesDataPoint {
   queryCount: number;
 }
 
+export interface CumulativeCostTimeSeriesDataPoint {
+  timestamp: number;
+  naiveCost: number;
+  actualCost: number;
+  saved: number;
+  queryCount: number;
+}
+
 export const queryAPI = {
   /**
    * Submit a query to the orchestrator
@@ -237,6 +245,22 @@ export const queryAPI = {
     return data.map((point: any) => ({
       timestamp: point.timestamp,
       avgLatency: point.avg_latency ?? point.avgLatency,
+      queryCount: point.query_count ?? point.queryCount,
+    }));
+  },
+
+  /**
+   * Get time-series data for cumulative cost comparison (naive vs actual)
+   */
+  async getCumulativeCostTimeSeries(bucketSeconds: number = 60, numBuckets: number = 20): Promise<CumulativeCostTimeSeriesDataPoint[]> {
+    const response = await api.get(`/api/metrics/timeseries/cumulative-cost?bucket_seconds=${bucketSeconds}&num_buckets=${numBuckets}`);
+    const data = response.data.data;
+
+    return data.map((point: any) => ({
+      timestamp: point.timestamp,
+      naiveCost: point.naive_cost ?? point.naiveCost,
+      actualCost: point.actual_cost ?? point.actualCost,
+      saved: point.saved,
       queryCount: point.query_count ?? point.queryCount,
     }));
   },
