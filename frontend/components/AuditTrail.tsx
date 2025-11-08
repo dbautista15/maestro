@@ -30,7 +30,7 @@ export default function AuditTrail({ queries }: AuditTrailProps) {
       >
         <h3 className="text-sm font-semibold flex items-center gap-2">
           <Database size={20} className="text-gray-600" />
-          Recent Queries ({queries.length})
+          Recent Queries
         </h3>
         <ChevronDown 
           size={20} 

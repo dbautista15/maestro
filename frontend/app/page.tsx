@@ -40,7 +40,7 @@ export default function Dashboard() {
 
   const fetchRecentQueries = async () => {
     try {
-      const data = await queryAPI.getRecentQueries(10);
+      const data = await queryAPI.getRecentQueries(5);
       setRecentQueries(data);
     } catch (err) {
       console.error('Failed to fetch recent queries:', err);
