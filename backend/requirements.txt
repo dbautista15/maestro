@@ -12,8 +12,8 @@ google-generativeai
 
 
 # Embeddings
-sentence-transformers
-
+sentence-transformers>=2.2.0
+huggingface-hub>=0.19.0
 # Data Processing
 numpy
 scipy
